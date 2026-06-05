@@ -1,0 +1,18 @@
+services:
+  backend:
+    build: ./email-spam-detection-backend
+    container_name: spam-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+
+  frontend:
+    build: ./email-spam-detection-web-app
+    container_name: spam-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
