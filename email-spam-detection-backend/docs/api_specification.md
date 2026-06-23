@@ -122,13 +122,20 @@ All endpoints are prefixed with `/api/v1` and exposed in [routes.py](file:///Use
     ```
 * **Processing Flow**:
   1. **Validation**: Validate that either `file` or `body` is provided. If both are missing, return `400 Bad Request`.
-  2. **File Processing** (if `file` is provided): Check extension and parse the file to extract the text body, subject, and sender headers.
-  3. **Sentence Tokenization**: Segment the email body into trimmed sentences.
-  4. **Multi-Model Inference**:
+  2. **File Processing & Content Extraction** (if `file` is provided):
+     * Validate the file extension (must be `.eml`, `.msg`, or `.txt`).
+     * For `.eml` files: Invoke `parse_eml()` from [utils.py](file:///Users/showwaiyan/Dev/cos30049-assignment3/email-spam-detection-backend/app/utils.py) to read the bytes and extract the subject and body text.
+     * For `.txt` files: Read the file content and set it as `body`.
+  3. **Text Preprocessing**:
+     * Clean the email body text by invoking `clean_text()` from [utils.py](file:///Users/showwaiyan/Dev/cos30049-assignment3/email-spam-detection-backend/app/utils.py). This cleans HTML tags, normalizes phone numbers, urls, emails, emojis, and punctuation, and converts characters to lowercase.
+     * Combine the subject and body text using `prepare_email_text(subject, body)` from [utils.py](file:///Users/showwaiyan/Dev/cos30049-assignment3/email-spam-detection-backend/app/utils.py) before feeding it to the ML models.
+     * If the ML classifiers require structural or numeric email features, extract them from the text by calling `extract_features()` from [utils.py](file:///Users/showwaiyan/Dev/cos30049-assignment3/email-spam-detection-backend/app/utils.py).
+  4. **Sentence Tokenization**: Segment the original email body into trimmed sentences using punctuation boundary rules.
+  5. **Multi-Model Inference**:
      * Loop through the 4 loaded models (`naive_bayes`, `k_means`, `logistic_regression`, `linear_svm`).
-     * Run predictions on the overall body text and generate `ModelPrediction` for each.
-     * Loop through each sentence segment, run predictions under each model, and map the outputs.
-  5. **Response**: Return the assembled `PredictionResponse`.
+     * Run predictions on the preprocessed body/features to generate `ModelPrediction` classifications.
+     * Loop through each sentence segment, preprocess it with `clean_text()`, run predictions under each model, and map the outputs.
+  6. **Response**: Return the assembled `PredictionResponse`.
 
 * **Success Response (200 OK)**:
   ```json
@@ -262,17 +269,16 @@ All endpoints are prefixed with `/api/v1` and exposed in [routes.py](file:///Use
   1. **Validation**: Check if `file` is provided and has a `.csv` extension. If invalid, return a `400 Bad Request`.
   2. **CSV Parsing**:
      * Read the CSV file content using Python's standard `csv` library.
-     * Locate columns named `subject` (optional) and `body` (required). If the `body` column is missing, return a `400 Bad Request` with an appropriate error.
+     * Locate columns named `subject` (optional) and `body` (required). If the `body` column is missing, return a `400 Bad Request`.
      * Filter out empty rows.
-  3. **Batch Prediction**:
+  3. **Batch Prediction & Preprocessing**:
      * Initialize count accumulators (`spam_count`, `ham_count`) to `0` for all 4 models.
-     * For each valid row:
-       * Feed the `body` text to the 4 classifiers (`naive_bayes`, `k_means`, `logistic_regression`, `linear_svm`).
-       * Update the respective model's spam/ham counters based on the predicted labels.
+     * For each valid row, preprocess the text by using `clean_text()` or `extract_features()` (which calls `clean_db_text()` and `process_text_advanced()` to apply stemming, stopword removal, and punctuation filtering) from [utils.py](file:///Users/showwaiyan/Dev/cos30049-assignment3/email-spam-detection-backend/app/utils.py).
+     * Feed the preprocessed features to the 4 classifiers (`naive_bayes`, `k_means`, `logistic_regression`, `linear_svm`).
+     * Update the respective model's spam/ham counters based on the predicted labels.
   4. **Spam Keyword Extraction (Top Spam Words)**:
-     * *Defining Spam Emails*: Identify rows classified as spam. To ensure quality, a row is defined as spam if the **Naive Bayes** model classifies it as spam (or, alternatively, if the majority of the 4 models classify it as spam).
-     * *Tokenization*: For each classified spam email, split the `body` text into lowercase words.
-     * *Stopword Filtering*: Exclude common English stopwords (e.g., *"the"*, *"and"*, *"a"*, *"of"*, *"to"*, *"in"*, *"is"*, *"you"*, *"it"*).
+     * *Defining Spam Emails*: Identify rows classified as spam. A row is defined as spam if the **Naive Bayes** model classifies it as spam.
+     * *Tokenization & Stopword Filtering*: For each classified spam email, extract lowercase cleaned words using the stopwords configuration in [utils.py](file:///Users/showwaiyan/Dev/cos30049-assignment3/email-spam-detection-backend/app/utils.py).
      * *Word Frequencies*: Calculate the number of spam emails in which each word appears.
      * *Percentage Formula*:
        $$\text{percentage} = \left(\frac{\text{Number of spam emails containing the word}}{\text{Total number of spam emails}}\right) \times 100$$
