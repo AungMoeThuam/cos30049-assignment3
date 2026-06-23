@@ -2,7 +2,11 @@
 
 This document details the API specification for the `email-spam-detection-backend` application. The backend is built using [FastAPI](https://fastapi.tiangolo.com/) (Python 3.12) to serve spam/ham predictions for the frontend application.
 
-The API supports a single, combined prediction endpoint that accepts both copy-pasted email details (subject, body, sender) and uploaded email files (.eml, .msg, .txt) using `multipart/form-data`.
+The API supports a single, combined prediction endpoint that accepts both copy-pasted email details (subject, body, sender) and uploaded email files (.eml, .msg, .txt) using `multipart/form-data`. The prediction pipeline uses **four distinct machine learning models** to classify the inputs:
+1. **Naive Bayes** (`naive_bayes`)
+2. **K-Means Clustering** (`k_means`)
+3. **Logistic Regression** (`logistic_regression`)
+4. **Linear SVM** (`linear_svm`)
 
 ---
 
@@ -13,45 +17,60 @@ The backend specification covers and relates to the following files:
 * API routes: [routes.py](file:///Users/showwaiyan/Dev/cos30049-assignment3/email-spam-detection-backend/app/routes.py)
 * Pydantic schemas: [schemas.py](file:///Users/showwaiyan/Dev/cos30049-assignment3/email-spam-detection-backend/app/schemas.py)
 * ML Classifier Integration: [models.py](file:///Users/showwaiyan/Dev/cos30049-assignment3/email-spam-detection-backend/app/models.py)
+* Pre-trained ML Models Folder: [models](file:///Users/showwaiyan/Dev/cos30049-assignment3/email-spam-detection-backend/models)
 
 ---
 
-## 2. Design Justification: Sentence-Level vs. Word-Level Classification
+## 2. ML Models Integration Details
 
-The classification breakdown in this project is designed **sentence-by-sentence** rather than **word-by-word** for the following reasons:
+The pre-trained classifiers (e.g., `.pkl` or `.joblib` files) are stored in the [models](file:///Users/showwaiyan/Dev/cos30049-assignment3/email-spam-detection-backend/models) folder. The backend loads these files at startup:
+* `naive_bayes.pkl` (or `.joblib`)
+* `k_means.pkl` (or `.joblib`)
+* `logistic_regression.pkl` (or `.joblib`)
+* `linear_svm.pkl` (or `.joblib`)
 
-1. **Context Preservation**: Machine learning classifiers (like TF-IDF + Naive Bayes, Logistic Regression, or N-grams) rely on word associations and context. A single word (e.g., *"free"*, *"money"*, *"click"*) might be completely safe in a sentence like *"Feel free to email me"*, but spammy in *"Get free money now!"*. Running predictions word-by-word ignores semantic context and results in highly inaccurate individual word labels.
-2. **UI/UX Readability**: Highlighting entire sentences based on spam risk is clean and readable. Word-by-word highlights create a "patchy" interface that is visually cluttered and hard to read.
-3. **Performance Optimization**: Classifying a few sentences (e.g., 5 to 20 sentences) is significantly faster and consumes far fewer system resources than running inference on hundreds of individual words.
+### Model Output Standardization
+1. **Probability-Based Classifiers** (Naive Bayes & Logistic Regression):
+   * Naturally output classification probabilities using `predict_proba()`.
+2. **Non-Probability Classifiers** (Linear SVM & K-Means):
+   * *Linear SVM*: Standard SVMs do not naturally output probability scores. The backend should utilize Platt scaling (e.g. setting `probability=True` during training in Scikit-Learn) to enable `predict_proba()`, or map the `decision_function()` score using a Sigmoid function to generate a pseudo-probability score.
+   * *K-Means Clustering*: Distance metrics to cluster centroids are computed and normalized (e.g., using Softmax or inverse distance scaling) to generate ham/spam affinity scores between `0.0` and `1.0`.
 
 ---
 
 ## 3. Data Models (Schemas)
 
-The schemas in [schemas.py](file:///Users/showwaiyan/Dev/cos30049-assignment3/email-spam-detection-backend/app/schemas.py) must define the following data structures.
+The schemas in [schemas.py](file:///Users/showwaiyan/Dev/cos30049-assignment3/email-spam-detection-backend/app/schemas.py) must define the following multi-model data structures.
 
-### Sentence Breakdown: `SentencePrediction`
-Holds prediction details for each individual sentence within the email body.
+### Model Prediction Result: `ModelPrediction`
+Holds prediction details from a single model.
 ```python
 from pydantic import BaseModel, Field
 
+class ModelPrediction(BaseModel):
+    label: str = Field(..., description="Classification label: 'spam' or 'ham'")
+    confidence: float = Field(..., ge=0.0, le=1.0, description="Confidence of the prediction (probability of the chosen label)")
+    spam_probability: float = Field(..., ge=0.0, le=1.0, description="Model spam probability")
+    ham_probability: float = Field(..., ge=0.0, le=1.0, description="Model ham probability")
+```
+
+### Sentence Breakdown: `SentencePrediction`
+Holds prediction details for each individual sentence across the four models.
+```python
+from typing import Dict
+
 class SentencePrediction(BaseModel):
     text: str = Field(..., description="The individual sentence text")
-    label: str = Field(..., description="Classification label: 'spam' or 'ham'")
-    spam_probability: float = Field(..., ge=0.0, le=1.0, description="Spam probability percentage")
-    ham_probability: float = Field(..., ge=0.0, le=1.0, description="Ham probability percentage")
+    models: Dict[str, ModelPrediction] = Field(..., description="Mapping of model identifier (e.g., 'naive_bayes') to its prediction")
 ```
 
 ### Prediction Payload: `PredictionResult`
-Holds the complete classification results for the entire email, including the sentence-level breakdown.
+Holds the complete classification results for the entire email across all models.
 ```python
-from typing import List
+from typing import List, Dict
 
 class PredictionResult(BaseModel):
-    label: str = Field(..., description="Overall classification label: 'spam' or 'ham'")
-    confidence: float = Field(..., ge=0.0, le=1.0, description="Confidence of the overall prediction")
-    spam_probability: float = Field(..., ge=0.0, le=1.0, description="Overall spam probability")
-    ham_probability: float = Field(..., ge=0.0, le=1.0, description="Overall ham probability")
+    models: Dict[str, ModelPrediction] = Field(..., description="Mapping of model identifiers to their overall prediction result")
     sentences: List[SentencePrediction] = Field(default=[], description="List of sentence-by-sentence classification details")
 ```
 
@@ -72,7 +91,7 @@ class PredictionResponse(BaseModel):
 
 ### Classify Email (Combined Endpoint)
 * **Endpoint**: `POST /api/v1/predict`
-* **Purpose**: Process either a copy-pasted email or an uploaded email file.
+* **Purpose**: Process either a copy-pasted email or an uploaded email file and compute predictions from all 4 models.
 * **Request Header**: `Content-Type: multipart/form-data`
 * **Request Fields**:
   * `file`: Optional File upload (`.eml`, `.msg`, or `.txt`).
@@ -81,49 +100,104 @@ class PredictionResponse(BaseModel):
   * `sender`: Optional string.
 
 * **Processing Flow**:
-  1. **Validation**: Check if `file` is provided. If not, verify that `body` is provided and contains text. If both are missing, return a `400 Bad Request` with error details.
-  2. **File Processing** (if `file` is provided):
-     * Check extension. If not `.eml`, `.msg`, or `.txt`, reject the request.
-     * **`.txt`**: Read file content and set it as `body`.
-     * **`.eml`**: Parse with Python's standard `email` library. Extract `Subject` header, `From` header, and search MIME parts for the plain text `body`.
-     * **`.msg`**: Parse using message extractors to extract subject, sender, and text body.
-  3. **Sentence Tokenization**: Split the final `body` text into trimmed sentences (using regular expressions or light tokenizer).
-  4. **ML Inference**: Run classification on the full text and on each sentence separately.
-  5. **Response**: Construct and return `PredictionResponse`.
+  1. **Validation**: Validate that either `file` or `body` is provided. If both are missing, return `400 Bad Request`.
+  2. **File Processing** (if `file` is provided): Check extension and parse the file to extract the text body, subject, and sender headers.
+  3. **Sentence Tokenization**: Segment the email body into trimmed sentences.
+  4. **Multi-Model Inference**:
+     * Loop through the 4 loaded models (`naive_bayes`, `k_means`, `logistic_regression`, `linear_svm`).
+     * Run predictions on the overall body text and generate `ModelPrediction` for each.
+     * Loop through each sentence segment, run predictions under each model, and map the outputs.
+  5. **Response**: Return the assembled `PredictionResponse`.
 
 * **Success Response (200 OK)**:
   ```json
   {
     "success": true,
     "data": {
-      "label": "spam",
-      "confidence": 0.92,
-      "spam_probability": 0.92,
-      "ham_probability": 0.08,
+      "models": {
+        "naive_bayes": {
+          "label": "spam",
+          "confidence": 0.92,
+          "spam_probability": 0.92,
+          "ham_probability": 0.08
+        },
+        "k_means": {
+          "label": "spam",
+          "confidence": 0.74,
+          "spam_probability": 0.74,
+          "ham_probability": 0.26
+        },
+        "logistic_regression": {
+          "label": "spam",
+          "confidence": 0.88,
+          "spam_probability": 0.88,
+          "ham_probability": 0.12
+        },
+        "linear_svm": {
+          "label": "spam",
+          "confidence": 0.90,
+          "spam_probability": 0.90,
+          "ham_probability": 0.10
+        }
+      },
       "sentences": [
         {
           "text": "Congratulations!",
-          "label": "spam",
-          "spam_probability": 0.85,
-          "ham_probability": 0.15
-        },
-        {
-          "text": "You have won a free ticket.",
-          "label": "spam",
-          "spam_probability": 0.97,
-          "ham_probability": 0.03
-        },
-        {
-          "text": "Please click here to claim your reward.",
-          "label": "spam",
-          "spam_probability": 0.99,
-          "ham_probability": 0.01
+          "models": {
+            "naive_bayes": {
+              "label": "spam",
+              "confidence": 0.85,
+              "spam_probability": 0.85,
+              "ham_probability": 0.15
+            },
+            "k_means": {
+              "label": "spam",
+              "confidence": 0.70,
+              "spam_probability": 0.70,
+              "ham_probability": 0.30
+            },
+            "logistic_regression": {
+              "label": "spam",
+              "confidence": 0.80,
+              "spam_probability": 0.80,
+              "ham_probability": 0.20
+            },
+            "linear_svm": {
+              "label": "spam",
+              "confidence": 0.82,
+              "spam_probability": 0.82,
+              "ham_probability": 0.18
+            }
+          }
         },
         {
           "text": "Let me know when you get this.",
-          "label": "ham",
-          "spam_probability": 0.10,
-          "ham_probability": 0.90
+          "models": {
+            "naive_bayes": {
+              "label": "ham",
+              "confidence": 0.90,
+              "spam_probability": 0.10,
+              "ham_probability": 0.90
+            },
+            "k_means": {
+              "label": "ham",
+              "confidence": 0.65,
+              "spam_probability": 0.35,
+              "ham_probability": 0.65
+            },
+            "logistic_regression": {
+              "label": "ham",
+              "confidence": 0.94,
+              "spam_probability": 0.06,
+              "ham_probability": 0.94
+            },
+            "linear_svm": {
+              "label": "ham",
+              "confidence": 0.92,
+              "spam_probability": 0.08,
+              "ham_probability": 0.92
+            }
+          }
         }
       ]
     },
@@ -131,7 +205,7 @@ class PredictionResponse(BaseModel):
   }
   ```
 
-* **Validation Error Response (400 Bad Request)**:
+* **Error Response (400 Bad Request)**:
   ```json
   {
     "success": false,
@@ -139,26 +213,3 @@ class PredictionResponse(BaseModel):
     "error": "Missing input payload. You must provide either an email body text or upload a valid email file."
   }
   ```
-
-* **Format Error Response (400 Bad Request)**:
-  ```json
-  {
-    "success": false,
-    "data": null,
-    "error": "Unsupported file format. Please upload a .eml, .msg, or .txt file."
-  }
-  ```
-
----
-
-## 5. Algorithmic Workflows & Logic
-
-### 5.1. Sentence Segmentation (Tokenization)
-The backend splits the final text body into distinct sentences:
-* **Approach**: Regular Expression parsing using punctuation rules (e.g., splitting on `(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s`).
-* **Trimming**: Remove leading/trailing whitespaces from each sentence. Empty segments must be filtered out.
-
-### 5.2. Classification Inference Pipeline
-The `SpamClassifier` in [models.py](file:///Users/showwaiyan/Dev/cos30049-assignment3/email-spam-detection-backend/app/models.py) must support scoring arbitrary string inputs:
-1. **Full Text Prediction**: Preprocess the entire body string and run `predict_proba()` to compute overall probabilities.
-2. **Sentence Prediction**: For each sentence, run the classifier to evaluate sentence-level spam risk and collect values in the `sentences` response list.
