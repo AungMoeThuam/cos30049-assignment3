@@ -102,26 +102,14 @@ All endpoints are prefixed with `/api/v1` and exposed in [routes.py](file:///Use
   * `subject`: Optional string.
   * `body`: Optional string (Required if `file` is not provided).
   * `sender`: Optional string.
-* **Example Multipart Request Representation**:
-  * *Option A (Copy-Pasted fields)*:
+* **Example Request Representation**:
+  * *Option A (Copy-Pasted Text)*:
+    The frontend sends only the raw pasted text via the `body` field:
     ```text
-    Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
-    
-    ------WebKitFormBoundary7MA4YWxkTrZu0gW
-    Content-Disposition: form-data; name="sender"
-
-    rewards@win-lottery-today.com
-    ------WebKitFormBoundary7MA4YWxkTrZu0gW
-    Content-Disposition: form-data; name="subject"
-
-    Urgent Action Required: Special Offer!
-    ------WebKitFormBoundary7MA4YWxkTrZu0gW
-    Content-Disposition: form-data; name="body"
-
     Congratulations! You have won a free ticket. Please click here to claim your reward. Let me know when you get this.
-    ------WebKitFormBoundary7MA4YWxkTrZu0gW--
     ```
-  * *Option B (Uploaded Eml File fields)*:
+  * *Option B (Uploaded Eml File)*:
+    The frontend uploads the email file via the `file` field using multipart encoding:
     ```text
     Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
     
@@ -256,6 +244,7 @@ All endpoints are prefixed with `/api/v1` and exposed in [routes.py](file:///Use
   * `file`: Uploaded file binary (must be a `.csv` file).
   * `top_n`: Optional integer query parameter (default: `10`). Defines the number of top spam words to return.
 * **Example Multipart Request Representation**:
+  Sent as a multipart binary CSV file upload (with optional query parameter `?top_n=10`):
   ```text
   Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
   
