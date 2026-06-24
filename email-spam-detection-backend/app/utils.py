@@ -354,3 +354,65 @@ def parse_csv_emails(file_content: bytes) -> list[dict]:
         })
         
     return emails
+
+
+def extract_top_spam_words(spam_texts: list[str], top_n: int = 10) -> list[dict]:
+    """Extract top N spam trigger words and their occurrence percentage/count.
+
+    Args:
+        spam_texts: A list of email body texts that were classified as spam.
+        top_n: Number of top words to return (default: 10).
+
+    Returns:
+        list[dict]: List of dicts containing 'word', 'percentage', and 'count'.
+                    Sorted by count/percentage in descending order.
+    """
+    from collections import Counter
+    import string
+
+    if not spam_texts:
+        return []
+
+    stop_words = set(stopwords.words("english"))
+    total_spam_emails = len(spam_texts)
+    word_document_counts = Counter()
+
+    for text in spam_texts:
+        if not isinstance(text, str):
+            text = str(text)
+        
+        # Lowercase and replace punctuation with space (to separate words)
+        cleaned_text = text.lower()
+        translation_table = str.maketrans(string.punctuation, " " * len(string.punctuation))
+        cleaned_text = cleaned_text.translate(translation_table)
+        
+        # Split into words
+        words = cleaned_text.split()
+        
+        # Filter out stopwords, numbers, and short tokens, and keep unique words per email
+        unique_words_in_email = set(
+            word for word in words 
+            if word not in stop_words 
+            and not word.isdigit() 
+            and len(word) > 1
+        )
+        
+        for word in unique_words_in_email:
+            word_document_counts[word] += 1
+
+    # Sort by count descending, and by word alphabetically for tie-breaking
+    sorted_words = sorted(
+        word_document_counts.items(),
+        key=lambda item: (-item[1], item[0])
+    )
+
+    top_words = []
+    for word, count in sorted_words[:top_n]:
+        percentage = round((count / total_spam_emails) * 100, 1)
+        top_words.append({
+            "word": word,
+            "percentage": percentage,
+            "count": count
+        })
+
+    return top_words
