@@ -3,7 +3,7 @@ import tempfile
 import os
 import shutil
 import pandas as pd
-from app.utils import parse_eml, extract_features_for_text, parse_csv_emails
+from app.utils import parse_eml, extract_features_for_text, parse_csv_emails, extract_top_spam_words
 
 
 class TestParseEml(unittest.TestCase):
@@ -168,6 +168,47 @@ class TestParseCsv(unittest.TestCase):
         with self.assertRaises(ValueError) as context:
             parse_csv_emails(csv_content)
         self.assertIn("empty or has no header row", str(context.exception))
+
+
+class TestExtractTopSpamWords(unittest.TestCase):
+    def test_basic_word_frequency(self):
+        spam_emails = [
+            "Get free cash prize today!",
+            "Claim your free gift now",
+            "Urgent: prize winner announcement"
+        ]
+        # Total spam emails = 3
+        # Frequencies:
+        # 'free': 2 (66.7%)
+        # 'prize': 2 (66.7%)
+        # others: 1 (33.3%)
+        
+        top_words = extract_top_spam_words(spam_emails, top_n=2)
+        self.assertEqual(len(top_words), 2)
+        
+        # Verify sorting (alphabetical tie breaker: 'free' before 'prize')
+        self.assertEqual(top_words[0]["word"], "free")
+        self.assertEqual(top_words[0]["count"], 2)
+        self.assertEqual(top_words[0]["percentage"], 66.7)
+        
+        self.assertEqual(top_words[1]["word"], "prize")
+        self.assertEqual(top_words[1]["count"], 2)
+        self.assertEqual(top_words[1]["percentage"], 66.7)
+
+    def test_empty_input(self):
+        self.assertEqual(extract_top_spam_words([]), [])
+
+    def test_punctuation_and_stopwords_removed(self):
+        spam_emails = [
+            "The quick brown fox!!!",
+            "A quick brown dog..."
+        ]
+        top_words = extract_top_spam_words(spam_emails, top_n=5)
+        words = [w["word"] for w in top_words]
+        self.assertIn("quick", words)
+        self.assertIn("brown", words)
+        self.assertNotIn("the", words)
+        self.assertNotIn("a", words)
 
 
 if __name__ == "__main__":
