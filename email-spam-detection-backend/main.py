@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.routes import router as api_router
+
 app = FastAPI(title="Email Spam Detection API", version="1.0.0")
 
 app.add_middleware(
@@ -15,5 +17,5 @@ app.add_middleware(
 async def root():
     return {"message": "backend app"}
 
-# TODO: import and include routers from app/routes.py
-# TODO: add startup event to load ML model
+
+app.include_router(api_router, prefix="/api/v1")
