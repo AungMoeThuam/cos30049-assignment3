@@ -3,8 +3,7 @@ import tempfile
 import os
 import shutil
 import pandas as pd
-from email.header import decode_header, make_header
-from app.utils import parse_eml, extract_features_for_text
+from app.utils import parse_eml, extract_features_for_text, parse_csv_emails
 
 
 class TestParseEml(unittest.TestCase):
@@ -120,6 +119,55 @@ class TestExtractFeatures(unittest.TestCase):
         self.assertEqual(df["num_dollar"].iloc[0], 1)
         self.assertEqual(df["num_numbers"].iloc[0], 1) # "1000"
         self.assertEqual(df["emoji_count"].iloc[0], 1)
+
+
+class TestParseCsv(unittest.TestCase):
+    def test_valid_csv(self):
+        csv_content = (
+            b"subject,body\n"
+            b"Hello,Congratulations you won a lottery\n"
+            b"Meeting,Please confirm our 2 PM appointment\n"
+            b",Only body here"
+        )
+        emails = parse_csv_emails(csv_content)
+        self.assertEqual(len(emails), 3)
+        self.assertEqual(emails[0], {"subject": "Hello", "body": "Congratulations you won a lottery"})
+        self.assertEqual(emails[1], {"subject": "Meeting", "body": "Please confirm our 2 PM appointment"})
+        self.assertEqual(emails[2], {"subject": "", "body": "Only body here"})
+
+    def test_case_insensitive_headers(self):
+        csv_content = (
+            b"SubJect,BODY\n"
+            b"Hello,World"
+        )
+        emails = parse_csv_emails(csv_content)
+        self.assertEqual(len(emails), 1)
+        self.assertEqual(emails[0], {"subject": "Hello", "body": "World"})
+
+    def test_missing_body_column(self):
+        csv_content = (
+            b"subject,from\n"
+            b"Hello,sender@example.com"
+        )
+        with self.assertRaises(ValueError) as context:
+            parse_csv_emails(csv_content)
+        self.assertIn("missing the required 'body' column", str(context.exception))
+
+    def test_empty_rows_skipped(self):
+        csv_content = (
+            b"subject,body\n"
+            b"Hello, \n"
+            b"Test,Actual Body"
+        )
+        emails = parse_csv_emails(csv_content)
+        self.assertEqual(len(emails), 1)
+        self.assertEqual(emails[0], {"subject": "Test", "body": "Actual Body"})
+
+    def test_empty_csv(self):
+        csv_content = b""
+        with self.assertRaises(ValueError) as context:
+            parse_csv_emails(csv_content)
+        self.assertIn("empty or has no header row", str(context.exception))
 
 
 if __name__ == "__main__":

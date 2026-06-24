@@ -294,3 +294,63 @@ def extract_features_for_text(text: str) -> pd.DataFrame:
         text = str(text)
     series = pd.Series([text])
     return extract_features(series)
+
+
+def parse_csv_emails(file_content: bytes) -> list[dict]:
+    """Parse CSV content and extract subject and body fields.
+
+    Args:
+        file_content: The raw bytes of the uploaded CSV file.
+
+    Returns:
+        list[dict]: A list of dicts with keys 'subject' and 'body'.
+
+    Raises:
+        ValueError: If 'body' column is missing or if the CSV is malformed.
+    """
+    import csv
+    import io
+
+    try:
+        decoded_content = file_content.decode("utf-8-sig", errors="ignore")
+    except Exception as e:
+        raise ValueError(f"Failed to decode CSV file: {str(e)}")
+
+    csv_reader = csv.DictReader(io.StringIO(decoded_content))
+    
+    # Check if header exists
+    if not csv_reader.fieldnames:
+        raise ValueError("CSV file is empty or has no header row.")
+        
+    # Standardize column names to lowercase to be case-insensitive
+    fieldnames_lower = [field.lower().strip() for field in csv_reader.fieldnames]
+    
+    # Verify body column is present
+    if "body" not in fieldnames_lower:
+        raise ValueError("CSV file is missing the required 'body' column.")
+        
+    # Create mapping of original field names to lowercase names
+    field_map = {field.lower().strip(): field for field in csv_reader.fieldnames}
+    body_field = field_map["body"]
+    subject_field = field_map.get("subject")
+
+    emails = []
+    for row in csv_reader:
+        body_val = row.get(body_field)
+        body_val = body_val.strip() if body_val else ""
+        
+        # Skip empty rows (where body is blank)
+        if not body_val:
+            continue
+            
+        subject_val = ""
+        if subject_field:
+            subj = row.get(subject_field)
+            subject_val = subj.strip() if subj else ""
+
+        emails.append({
+            "subject": subject_val,
+            "body": body_val
+        })
+        
+    return emails
