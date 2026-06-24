@@ -131,11 +131,19 @@ def parse_eml(filepath):
         tuple: (subject, body)
     """
     import email
+    from email.header import decode_header, make_header
 
     with open(filepath, "rb") as f:
         msg = email.message_from_bytes(f.read())
 
-    subject = msg.get("Subject", "")
+    subject_header = msg.get("Subject", "")
+    if subject_header:
+        try:
+            subject = str(make_header(decode_header(subject_header)))
+        except Exception:
+            subject = str(subject_header)
+    else:
+        subject = ""
 
     plain_body = ""
     html_body = ""
@@ -154,7 +162,12 @@ def parse_eml(filepath):
     else:
         payload = msg.get_payload(decode=True)
         if payload:
-            plain_body = payload.decode("utf-8", errors="ignore")
+            content_type = msg.get_content_type()
+            decoded = payload.decode("utf-8", errors="ignore")
+            if content_type == "text/html":
+                html_body = decoded
+            else:
+                plain_body = decoded
 
     if html_body.strip():
         extractor = HTMLTextExtractor()
