@@ -1,9 +1,15 @@
+import csv
+import io
 import re
+import tempfile
+from collections import Counter
 from pathlib import Path
 from typing import Dict, Optional
 
+import pandas as pd
 from fastapi import APIRouter, File, Form, Response, UploadFile
 
+from app.models import classifier
 from app.schemas import (
     CsvPredictionResponse,
     CsvPredictionResult,
@@ -13,6 +19,7 @@ from app.schemas import (
     PredictionResult,
     SpamWordInfo,
 )
+from app.utils import clean_text, extract_features, parse_eml, prepare_email_text
 
 router = APIRouter()
 
@@ -25,22 +32,6 @@ MISSING_INPUT_ERROR = (
 )
 
 
-def _mock_model_predictions(spam_probability: float) -> Dict[str, ModelPrediction]:
-    ham_probability = round(1.0 - spam_probability, 2)
-    label = "spam" if spam_probability >= ham_probability else "ham"
-    confidence = max(spam_probability, ham_probability)
-
-    return {
-        model_name: ModelPrediction(
-            label=label,
-            confidence=confidence,
-            spam_probability=spam_probability,
-            ham_probability=ham_probability,
-        )
-        for model_name in MODEL_NAMES
-    }
-
-
 def _split_sentences(text: str) -> list[str]:
     sentences = [
         sentence.strip()
@@ -50,12 +41,70 @@ def _split_sentences(text: str) -> list[str]:
     return sentences or [text.strip()]
 
 
-async def _extract_stub_body(file: UploadFile, body: Optional[str]) -> str:
-    content = await file.read()
-    if Path(file.filename or "").suffix.lower() == ".txt":
-        return content.decode("utf-8", errors="ignore").strip()
+def _get_real_model_predictions(text: str) -> Dict[str, ModelPrediction]:
+    if not text.strip():
+        return {
+            name: ModelPrediction(
+                label="ham", confidence=1.0, spam_probability=0.0, ham_probability=1.0
+            )
+            for name in MODEL_NAMES
+        }
 
-    return body or f"Mock prediction content extracted from {file.filename}."
+    df = extract_features(pd.Series([text]))
+    results = classifier.predict_all(df)
+    predictions = {}
+    
+    for name, res in results.items():
+        if "error" in res:
+            predictions[name] = ModelPrediction(
+                label="error", confidence=0.0, spam_probability=0.0, ham_probability=1.0
+            )
+            continue
+
+        label = "spam" if str(res["label"]) == "1" else "ham"
+        confidence = float(res["confidence"])
+
+        if label == "spam":
+            spam_probability = confidence
+            ham_probability = 1.0 - confidence
+        else:
+            ham_probability = confidence
+            spam_probability = 1.0 - confidence
+
+        predictions[name] = ModelPrediction(
+            label=label,
+            confidence=confidence,
+            spam_probability=spam_probability,
+            ham_probability=ham_probability,
+        )
+        
+    return predictions
+
+
+async def _extract_real_body(file: Optional[UploadFile], body: Optional[str], subject: Optional[str]) -> str:
+    if file is None:
+        return prepare_email_text(subject or "", body or "")
+
+    content = await file.read()
+    extension = Path(file.filename or "").suffix.lower()
+
+    if extension == ".txt":
+        file_body = content.decode("utf-8", errors="ignore").strip()
+        return prepare_email_text(subject or "", file_body)
+
+    if extension in {".eml", ".msg"}:
+        with tempfile.NamedTemporaryFile(delete=False) as tmp:
+            tmp.write(content)
+            tmp_path = tmp.name
+
+        try:
+            eml_subject, eml_body = parse_eml(tmp_path)
+            final_sub = subject if subject and subject.strip() else eml_subject
+            return prepare_email_text(final_sub, eml_body)
+        finally:
+            Path(tmp_path).unlink(missing_ok=True)
+
+    return prepare_email_text(subject or "", body or "")
 
 
 @router.post("/predict", response_model=PredictionResponse)
@@ -80,20 +129,18 @@ async def predict_email(
                 error="Unsupported file type. Upload a .eml, .msg, or .txt file.",
             )
 
-    email_body = await _extract_stub_body(file, body) if file else body.strip()
-    combined_text = " ".join(
-        part.strip() for part in (subject, email_body, sender) if part and part.strip()
-    )
-
-    overall_models = _mock_model_predictions(spam_probability=0.92)
+    combined_text = await _extract_real_body(file, body, subject)
+    if sender:
+        combined_text = f"{sender} {combined_text}"
+        
+    overall_models = _get_real_model_predictions(combined_text)
+    
     sentence_predictions = [
         {
             "text": sentence,
-            "models": _mock_model_predictions(
-                spam_probability=0.85 if index == 0 else 0.10
-            ),
+            "models": _get_real_model_predictions(sentence),
         }
-        for index, sentence in enumerate(_split_sentences(combined_text))
+        for sentence in _split_sentences(combined_text)
     ]
 
     return PredictionResponse(
@@ -117,30 +164,81 @@ async def predict_csv(
             error="Invalid file type. Upload a .csv file.",
         )
 
-    mock_top_spam_words = [
-        SpamWordInfo(word="free", percentage=84.6, count=55),
-        SpamWordInfo(word="winner", percentage=69.2, count=45),
-        SpamWordInfo(word="claim", percentage=61.5, count=40),
-        SpamWordInfo(word="urgent", percentage=53.8, count=35),
-        SpamWordInfo(word="offer", percentage=49.2, count=32),
-        SpamWordInfo(word="click", percentage=46.2, count=30),
-        SpamWordInfo(word="prize", percentage=43.1, count=28),
-        SpamWordInfo(word="guaranteed", percentage=38.5, count=25),
-        SpamWordInfo(word="cash", percentage=35.4, count=23),
-        SpamWordInfo(word="reply", percentage=30.8, count=20),
-    ][: max(top_n, 0)]
+    content = await file.read()
+    try:
+        decoded_content = content.decode("utf-8")
+        reader = csv.DictReader(io.StringIO(decoded_content))
+    except Exception:
+        response.status_code = 400
+        return CsvPredictionResponse(success=False, data=None, error="Invalid CSV format.")
+
+    if not reader.fieldnames or "body" not in reader.fieldnames:
+        response.status_code = 400
+        return CsvPredictionResponse(success=False, data=None, error="CSV file is missing the required 'body' column.")
+
+    total_emails = 0
+    model_summaries = {name: {"spam": 0, "ham": 0} for name in MODEL_NAMES}
+    spam_texts = []
+
+    for row in reader:
+        text = row.get("body", "")
+        if not text or not str(text).strip():
+            continue
+            
+        total_emails += 1
+        
+        subject = row.get("subject", "")
+        combined_text = prepare_email_text(subject, text)
+
+        features_df = extract_features(pd.Series([combined_text]))
+        results = classifier.predict_all(features_df)
+
+        is_nb_spam = False
+        
+        for name, res in results.items():
+            if "error" not in res:
+                if str(res["label"]) == "1":
+                    model_summaries[name]["spam"] += 1
+                    if name == "naive_bayes":
+                        is_nb_spam = True
+                else:
+                    model_summaries[name]["ham"] += 1
+
+        if is_nb_spam:
+            spam_texts.append(combined_text)
+
+    if total_emails == 0:
+        return CsvPredictionResponse(
+            success=True,
+            data=CsvPredictionResult(total_emails=0, model_summaries={}, top_spam_words=[]),
+            error=None,
+        )
+
+    word_counts = Counter()
+    total_spam_emails = len(spam_texts)
+    
+    for text in spam_texts:
+        cleaned_text = clean_text(text)
+        words = re.findall(r'\b[a-z]{3,}\b', cleaned_text)
+        word_counts.update(set(words))
+
+    top_spam_words = []
+    
+    for word, count in word_counts.most_common(max(top_n, 0)):
+        percentage = round((count / total_spam_emails) * 100, 1) if total_spam_emails > 0 else 0.0
+        top_spam_words.append(SpamWordInfo(word=word, percentage=percentage, count=count))
+
+    final_summaries = {
+        name: ModelBatchSummary(spam_count=counts["spam"], ham_count=counts["ham"])
+        for name, counts in model_summaries.items()
+    }
 
     return CsvPredictionResponse(
         success=True,
         data=CsvPredictionResult(
-            total_emails=150,
-            model_summaries={
-                "naive_bayes": ModelBatchSummary(spam_count=65, ham_count=85),
-                "k_means": ModelBatchSummary(spam_count=58, ham_count=92),
-                "logistic_regression": ModelBatchSummary(spam_count=62, ham_count=88),
-                "linear_svm": ModelBatchSummary(spam_count=64, ham_count=86),
-            },
-            top_spam_words=mock_top_spam_words,
+            total_emails=total_emails,
+            model_summaries=final_summaries,
+            top_spam_words=top_spam_words,
         ),
         error=None,
     )
