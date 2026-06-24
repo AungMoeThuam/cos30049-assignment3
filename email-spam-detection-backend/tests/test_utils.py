@@ -2,8 +2,9 @@ import unittest
 import tempfile
 import os
 import shutil
+import pandas as pd
 from email.header import decode_header, make_header
-from app.utils import parse_eml
+from app.utils import parse_eml, extract_features_for_text
 
 
 class TestParseEml(unittest.TestCase):
@@ -95,5 +96,32 @@ class TestParseEml(unittest.TestCase):
         self.assertEqual(body, "Hello World")
 
 
+class TestExtractFeatures(unittest.TestCase):
+    def test_extract_features_for_text(self):
+        text = "Congratulations! You won $1000 cash. Click http://win.com now! 🎁"
+        df = extract_features_for_text(text)
+        
+        # Verify it returns a DataFrame
+        self.assertIsInstance(df, pd.DataFrame)
+        self.assertEqual(len(df), 1)
+        
+        # Check that the 9 numeric columns and the text column exist
+        expected_cols = [
+            "num_urls", "num_exclamation", "num_question", "num_dollar",
+            "num_all_caps", "num_numbers", "word_count", "capital_ratio",
+            "emoji_count", "text"
+        ]
+        for col in expected_cols:
+            self.assertIn(col, df.columns)
+            
+        # Verify specific feature counts
+        self.assertEqual(df["num_urls"].iloc[0], 1)
+        self.assertEqual(df["num_exclamation"].iloc[0], 2)
+        self.assertEqual(df["num_dollar"].iloc[0], 1)
+        self.assertEqual(df["num_numbers"].iloc[0], 1) # "1000"
+        self.assertEqual(df["emoji_count"].iloc[0], 1)
+
+
 if __name__ == "__main__":
     unittest.main()
+

@@ -279,3 +279,18 @@ def extract_features(email):
     db["text"] = email.apply(clean_db_text)
     db["text"] = db["text"].apply(process_text_advanced)
     return db
+
+
+def extract_features_for_text(text: str) -> pd.DataFrame:
+    """Wrapper to extract features from a single raw text string.
+
+    Args:
+        text: The raw email text or split sentence.
+
+    Returns:
+        pd.DataFrame: A DataFrame containing the preprocessed text and the 9 NUM_COLS fields.
+    """
+    if not isinstance(text, str):
+        text = str(text)
+    series = pd.Series([text])
+    return extract_features(series)
