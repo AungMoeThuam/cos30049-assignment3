@@ -8,7 +8,7 @@ venv/
 env/
 
 # Model file (too large for git)
-*.pkl
+# *.pkl
 *.joblib
 model.pkl
 
