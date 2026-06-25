@@ -1,3 +1,4 @@
+import { useEffect } from "react"
 import { Outlet, useNavigate, useLocation } from "react-router"
 import {
   Typography,
@@ -11,12 +12,22 @@ import {
 
 const navLinks = [
   { label: "Home", path: "/" },
+  { label: "About", path: "/#about" },
   { label: "Email Checker", path: "/spam-check" },
 ]
 
 export default function RootLayout() {
   const navigate = useNavigate()
-  const { pathname } = useLocation()
+  const { pathname, hash } = useLocation()
+
+  useEffect(() => {
+    if (!hash) return
+
+    const target = document.querySelector(hash)
+    if (target) {
+      target.scrollIntoView({ behavior: "smooth", block: "start" })
+    }
+  }, [hash])
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh", bgcolor: "background.default" }}>
@@ -51,7 +62,8 @@ export default function RootLayout() {
             {/* Nav links (hidden on mobile for simplicity, but let's keep them visible) */}
             <Box sx={{ display: "flex", gap: 3, ml: 4 }}>
               {navLinks.map(({ label, path }) => {
-                const isActive = pathname === path
+                const currentPath = `${pathname}${hash}`
+                const isActive = path.includes("#") ? currentPath === path : pathname === path
                 return (
                   <Button
                     key={path}

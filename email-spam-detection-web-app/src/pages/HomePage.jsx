@@ -249,7 +249,7 @@ export default function HomePage() {
             COS30049 - Cloud Computing, Swinburne University of Technology
           </Typography>
         </Box>
-        
+
         <Grid container spacing={3}>
           {[
             {
@@ -307,6 +307,133 @@ export default function HomePage() {
             </Grid>
           ))}
         </Grid>
+
+        <Box
+          id="about"
+          sx={{
+            mt: 5,
+            mb: 3,
+            textAlign: "center",
+            scrollMarginTop: "88px",
+          }}
+        >
+          <Typography
+            variant="h4"
+            component="h3"
+            gutterBottom
+            sx={{
+              fontFamily: '"Manrope", sans-serif',
+              fontWeight: 800,
+              mb: 2,
+            }}
+          >
+            About Spam Detector
+          </Typography>
+          <Typography
+            variant="body1"
+            color="text.secondary"
+            sx={{
+              fontFamily: '"Manrope", sans-serif',
+              lineHeight: 1.7,
+              maxWidth: "820px",
+              mx: "auto",
+              mb: 4,
+            }}
+          >
+            This COS30049 full-stack machine learning application helps users inspect
+            suspicious emails through a FastAPI prediction service and a responsive
+            React dashboard. It supports pasted email text, single email files, and
+            CSV batch analysis for practical spam and phishing triage.
+          </Typography>
+        </Box>
+
+        <Grid container spacing={3} sx={{ mb: 4 }}>
+          {[
+            {
+              title: "Frontend",
+              desc: "React, Material UI, and D3 render validated input flows, model comparison bars, feature radar analysis, sentence heatmaps, and batch keyword summaries.",
+            },
+            {
+              title: "Backend",
+              desc: "FastAPI exposes POST and GET routes for single predictions, CSV processing, feature averages, and token-level sentence inspection.",
+            },
+            {
+              title: "AI Integration",
+              desc: "The service loads Assignment 2 model pipelines from backend/models and applies shared preprocessing, feature extraction, and probability postprocessing.",
+            },
+          ].map((item) => (
+            <Grid size={{ xs: 12, md: 4 }} key={item.title}>
+              <Card variant="outlined" sx={{ borderRadius: "8px", height: "100%" }}>
+                <CardContent sx={{ p: 3 }}>
+                  <Typography
+                    variant="h6"
+                    component="h4"
+                    sx={{
+                      fontFamily: '"Manrope", sans-serif',
+                      fontWeight: 700,
+                      mb: 1,
+                    }}
+                  >
+                    {item.title}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{
+                      fontFamily: '"Manrope", sans-serif',
+                      lineHeight: 1.6,
+                    }}
+                  >
+                    {item.desc}
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+
+        <Box
+          sx={{
+            border: "1px solid",
+            borderColor: "divider",
+            borderRadius: "8px",
+            p: 3,
+          }}
+        >
+          <Typography
+            variant="h6"
+            component="h4"
+            sx={{
+              fontFamily: '"Manrope", sans-serif',
+              fontWeight: 700,
+              mb: 2,
+            }}
+          >
+            Implemented API Surface
+          </Typography>
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+            {[
+              "GET /",
+              "GET /api/v1/feature-averages",
+              "POST /api/v1/predict",
+              "POST /api/v1/predict/csv",
+              "POST /api/v1/predict/sentence",
+            ].map((endpoint) => (
+              <Chip
+                key={endpoint}
+                label={endpoint}
+                variant="outlined"
+                sx={{
+                  bgcolor: "grey.50",
+                  borderColor: "divider",
+                  borderRadius: "999px",
+                  fontFamily: '"Manrope", sans-serif',
+                  fontWeight: 600,
+                }}
+              />
+            ))}
+          </Box>
+        </Box>
       </Box>
     </Box>
   )
