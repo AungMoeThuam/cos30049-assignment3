@@ -18,8 +18,13 @@ from app.schemas import (
     PredictionResponse,
     PredictionResult,
     SpamWordInfo,
+    SentenceRequest,
+    TokenPrediction,
+    SentenceAnalysisResult,
+    SentenceAnalysisResponse,
 )
-from app.utils import clean_text, extract_features, parse_eml, prepare_email_text
+from app.utils import clean_text, clean_db_text, extract_features, parse_eml, prepare_email_text
+from nltk.corpus import stopwords
 
 router = APIRouter()
 
@@ -241,4 +246,65 @@ async def predict_csv(
             top_spam_words=top_spam_words,
         ),
         error=None,
+    )
+
+
+@router.get("/feature-averages")
+async def get_feature_averages():
+    return {
+        "spam": {
+            "num_urls": 3.6833,
+            "num_exclamation": 7.165,
+            "num_question": 4.137,
+            "num_dollar": 8.0181,
+            "num_all_caps": 34.5333,
+            "num_numbers": 175.2476,
+            "word_count": 289.8766,
+            "capital_ratio": 0.1632,
+            "emoji_count": 0.483
+        },
+        "ham": {
+            "num_urls": 2.7441,
+            "num_exclamation": 1.3018,
+            "num_question": 2.2157,
+            "num_dollar": 1.3032,
+            "num_all_caps": 42.9056,
+            "num_numbers": 713.131,
+            "word_count": 499.6754,
+            "capital_ratio": 0.1739,
+            "emoji_count": 0.0573
+        }
+    }
+
+
+@router.post("/predict/sentence", response_model=SentenceAnalysisResponse)
+async def predict_sentence(request: SentenceRequest) -> SentenceAnalysisResponse:
+    text = request.sentence
+    if not text or not text.strip():
+        return SentenceAnalysisResponse(
+            success=False,
+            data=None,
+            error="Empty sentence provided."
+        )
+    
+    # Clean text using clean_db_text
+    cleaned_text = clean_db_text(text)
+    
+    # Filter stopwords and short tokens
+    try:
+        stop_words = set(stopwords.words("english"))
+    except Exception:
+        stop_words = set()
+        
+    tokens = [t for t in re.findall(r'\b[a-z]{3,}\b', cleaned_text) if t not in stop_words]
+    
+    token_predictions = []
+    for token in tokens:
+        models_pred = _get_real_model_predictions(token)
+        token_predictions.append(TokenPrediction(token=token, models=models_pred))
+        
+    return SentenceAnalysisResponse(
+        success=True,
+        data=SentenceAnalysisResult(tokens=token_predictions),
+        error=None
     )
