@@ -126,6 +126,7 @@ Depending on the tab used to submit the request, the page displays one of two da
 
 - Displays a side-by-side comparative grid showing the overall classification result for each model:
   - Naive Bayes, K-Means, Logistic Regression, and Linear SVM.
+- **Bar Chart Visualization**: Renders a Bar Chart comparing the Spam Probability vs Ham Probability for each of the 4 models side-by-side, allowing the user to visually identify the discrepancies between classifiers.
 - **Interactive Selector**: A `<ToggleButtonGroup>` or `<Select>` element allows the user to choose the **Active Classifier** to load in the sentence heatmap.
 
 #### 5.1.2. Active Model Overall Result Card
