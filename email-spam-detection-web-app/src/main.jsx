@@ -19,7 +19,40 @@ const router = createBrowserRouter([
   },
 ])
 
-const theme = createTheme()
+const theme = createTheme({
+  typography: {
+    fontFamily: '"Manrope", "Roboto", "Helvetica", "Arial", sans-serif',
+    h1: {
+      fontWeight: 800,
+      fontFamily: '"Manrope", sans-serif',
+    },
+    h2: {
+      fontWeight: 700,
+      fontFamily: '"Manrope", sans-serif',
+    },
+    h3: {
+      fontWeight: 700,
+      fontFamily: '"Manrope", sans-serif',
+    },
+    h4: {
+      fontWeight: 600,
+      fontFamily: '"Manrope", sans-serif',
+    },
+    button: {
+      textTransform: "none",
+      fontWeight: 600,
+      fontFamily: '"Manrope", sans-serif',
+    },
+  },
+  palette: {
+    primary: {
+      main: "#0F172A",
+    },
+    background: {
+      default: "#f7f9fb",
+    },
+  },
+})
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
