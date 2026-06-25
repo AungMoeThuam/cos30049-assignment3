@@ -4,13 +4,12 @@ import {
   Button,
   Container,
   Box,
+  Link,
 } from "@mui/material"
 
 const navLinks = [
-  { label: "Dashboard", path: "/" },
-  { label: "Analytics", path: "/about" },
-  { label: "Detection Log", path: "/spam-check" },
-  { label: "Settings", path: "/about" },
+  { label: "Home", path: "/" },
+  { label: "Email Checker", path: "/spam-check" },
 ]
 
 export default function RootLayout() {
@@ -18,120 +17,147 @@ export default function RootLayout() {
   const { pathname } = useLocation()
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh", bgcolor: "#f7f9fb" }}>
-      <Box
-        component="header"
-        sx={{
-          height: 64,
-          borderBottom: "1px solid",
+    <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh", bgcolor: "background.default" }}>
+      {/* Navigation Header */}
+      <AppBar 
+        position="static" 
+        color="transparent" 
+        elevation={0}
+        sx={{ 
+          bgcolor: "background.paper", 
+          borderBottom: "1px solid", 
           borderColor: "divider",
-          bgcolor: "#fff",
+          px: { xs: 2, md: 8 }
         }}
       >
-        <Container
-          maxWidth="lg"
-          sx={{
-            height: "100%",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <Typography
-            variant="subtitle2"
-            fontWeight={800}
-            sx={{ cursor: "pointer" }}
-            onClick={() => navigate("/")}
-          >
-            Veritas AI
-          </Typography>
+        <Toolbar disableGutters sx={{ justifyContent: "space-between", height: 64 }}>
+          {/* Logo / Brand Name */}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 4 }}>
+            <Typography
+              variant="h6"
+              onClick={() => navigate("/")}
+              sx={{
+                fontWeight: 800,
+                cursor: "pointer",
+                color: "text.primary",
+                fontFamily: '"Manrope", sans-serif',
+              }}
+            >
+              Spam Detector
+            </Typography>
 
-          <Box sx={{ display: "flex", gap: 3, alignItems: "center" }}>
-            {navLinks.map(({ label, path }) => (
-              <Button
-                key={path}
-                size="small"
-                color="inherit"
-                onClick={() => navigate(path)}
-                sx={{
-                  minWidth: 0,
-                  px: 0,
-                  py: 0.5,
-                  borderRadius: 0,
-                  fontSize: 13,
-                  color: pathname === path ? "text.primary" : "text.secondary",
-                  borderBottom: pathname === path ? "2px solid #000" : "2px solid transparent",
-                }}
-              >
-                {label}
-              </Button>
-            ))}
+            {/* Nav links (hidden on mobile for simplicity, but let's keep them visible) */}
+            <Box sx={{ display: "flex", gap: 3, ml: 4 }}>
+              {navLinks.map(({ label, path }) => {
+                const isActive = pathname === path
+                return (
+                  <Button
+                    key={path}
+                    onClick={() => navigate(path)}
+                    sx={{
+                      color: isActive ? "text.primary" : "text.secondary",
+                      fontWeight: isActive ? 700 : 500,
+                      fontFamily: '"Manrope", sans-serif',
+                      fontSize: "14px",
+                      position: "relative",
+                      borderRadius: 0,
+                      px: 1,
+                      minWidth: "auto",
+                      borderBottom: isActive ? "2px solid" : "none",
+                      borderColor: "text.primary",
+                      "&:hover": {
+                        bgcolor: "transparent",
+                        color: "text.primary",
+                      }
+                    }}
+                  >
+                    {label}
+                  </Button>
+                )
+              })}
+            </Box>
           </Box>
 
+          {/* Action button */}
           <Button
             variant="contained"
-            size="small"
+            color="primary"
             onClick={() => navigate("/spam-check")}
             sx={{
-              bgcolor: "#000",
-              color: "#fff",
-              borderRadius: 1,
-              fontSize: 11,
-              px: 2,
-              py: 0.8,
-              "&:hover": { bgcolor: "#2d3133" },
+              borderRadius: "8px",
+              px: 3,
+              py: 1,
+              fontFamily: '"Manrope", sans-serif',
+              fontSize: "14px",
+              fontWeight: 600,
             }}
           >
             Analyze Email
           </Button>
-        </Container>
-      </Box>
+        </Toolbar>
+      </AppBar>
 
-      <Container maxWidth="lg" sx={{ py: 3, flexGrow: 1 }}>
+      {/* Main Content Area */}
+      <Container maxWidth="lg" sx={{ mt: 6, mb: 8, flexGrow: 1 }}>
         <Outlet />
       </Container>
 
-      <Box
-        component="footer"
-        sx={{
-          borderTop: "1px solid",
+      {/* Modern Minimalist Footer */}
+      <Box 
+        component="footer" 
+        sx={{ 
+          bgcolor: "background.paper", 
+          borderTop: "1px solid", 
           borderColor: "divider",
-          bgcolor: "#fff",
-          py: 2.5,
-          mt: "auto",
+          py: 4,
+          px: { xs: 3, md: 8 }
         }}
       >
-        <Container
-          maxWidth="lg"
-          sx={{
-            display: "flex",
-            flexDirection: { xs: "column", md: "row" },
-            gap: 2,
-            justifyContent: "space-between",
-            alignItems: { xs: "flex-start", md: "center" },
+        <Box 
+          sx={{ 
+            display: "flex", 
+            flexDirection: { xs: "column", md: "row" }, 
+            justifyContent: "space-between", 
+            alignItems: "center",
+            maxWidth: "lg",
+            mx: "auto",
+            gap: 2
           }}
         >
-          <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-            <Typography variant="caption" fontWeight={800}>
-              Veritas AI
+          <Box sx={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 1 }}>
+            <Typography 
+              variant="subtitle2" 
+              sx={{ fontWeight: 700, fontFamily: '"Manrope", sans-serif', mr: 2 }}
+            >
+              Spam Detector
             </Typography>
-            <Typography variant="caption" color="text.secondary">
-              © 2024 Veritas AI Technologies.
+            <Typography 
+              variant="caption" 
+              color="text.secondary" 
+              sx={{ fontFamily: '"Manrope", sans-serif' }}
+            >
+              © 2026 Spam Detector. Swinburne University Research Project.
             </Typography>
           </Box>
-          <Box sx={{ display: "flex", gap: 2.5 }}>
-            {["Privacy", "Terms", "Support"].map((label) => (
-              <Typography
-                key={label}
-                variant="caption"
+
+          <Box sx={{ display: "flex", gap: 3, flexWrap: "wrap" }}>
+            {["Privacy Policy", "Terms of Service", "Documentation", "Support"].map((item) => (
+              <Link
+                key={item}
+                href="#"
+                underline="hover"
                 color="text.secondary"
-                sx={{ cursor: "default" }}
+                sx={{ 
+                  fontFamily: '"Manrope", sans-serif', 
+                  fontSize: "12px",
+                  "&:hover": { color: "text.primary" }
+                }}
               >
-                {label}
-              </Typography>
+                {item}
+              </Link>
             ))}
           </Box>
-        </Container>
+        </Box>
       </Box>
     </Box>
   )
