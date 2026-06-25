@@ -74,3 +74,28 @@ class CsvPredictionResponse(BaseModel):
         None, description="Summarized prediction results, null on failure"
     )
     error: Optional[str] = Field(None, description="Error message on failure")
+
+
+class SentenceRequest(BaseModel):
+    sentence: str = Field(..., description="The sentence text to analyze")
+
+
+class TokenPrediction(BaseModel):
+    token: str = Field(..., description="The individual word/token")
+    models: Dict[str, ModelPrediction] = Field(
+        ..., description="Prediction results keyed by model identifier"
+    )
+
+
+class SentenceAnalysisResult(BaseModel):
+    tokens: List[TokenPrediction] = Field(
+        ..., description="Token-level prediction breakdown"
+    )
+
+
+class SentenceAnalysisResponse(BaseModel):
+    success: bool = Field(..., description="Indicates if analysis succeeded")
+    data: Optional[SentenceAnalysisResult] = Field(
+        None, description="Analysis results, null on failure"
+    )
+    error: Optional[str] = Field(None, description="Error message on failure")
