@@ -1,0 +1,403 @@
+<!DOCTYPE html><html class="light" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Spam Detector - Email Checker</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "secondary": "#515f74",
+                      "tertiary-fixed-dim": "#dec29a",
+                      "on-tertiary": "#ffffff",
+                      "on-error": "#ffffff",
+                      "error-container": "#ffdad6",
+                      "secondary-container": "#d5e3fc",
+                      "inverse-on-surface": "#eff1f3",
+                      "tertiary-fixed": "#fcdeb5",
+                      "on-tertiary-fixed-variant": "#574425",
+                      "background": "#f7f9fb",
+                      "surface-container-highest": "#e0e3e5",
+                      "secondary-fixed-dim": "#b9c7df",
+                      "on-tertiary-fixed": "#271901",
+                      "on-secondary-fixed": "#0d1c2e",
+                      "on-primary-fixed": "#131b2e",
+                      "outline-variant": "#c6c6cd",
+                      "on-background": "#191c1e",
+                      "surface-container-lowest": "#ffffff",
+                      "primary-fixed-dim": "#bec6e0",
+                      "inverse-primary": "#bec6e0",
+                      "surface-bright": "#f7f9fb",
+                      "error": "#ba1a1a",
+                      "on-primary": "#ffffff",
+                      "primary": "#000000",
+                      "on-tertiary-container": "#98805d",
+                      "on-surface-variant": "#45464d",
+                      "outline": "#76777d",
+                      "surface-dim": "#d8dadc",
+                      "surface-container-low": "#f2f4f6",
+                      "on-secondary": "#ffffff",
+                      "tertiary-container": "#271901",
+                      "secondary-fixed": "#d5e3fc",
+                      "primary-container": "#131b2e",
+                      "on-primary-fixed-variant": "#3f465c",
+                      "primary-fixed": "#dae2fd",
+                      "surface-container": "#eceef0",
+                      "inverse-surface": "#2d3133",
+                      "surface-variant": "#e0e3e5",
+                      "tertiary": "#000000",
+                      "surface-container-high": "#e6e8ea",
+                      "surface": "#f7f9fb",
+                      "on-secondary-fixed-variant": "#3a485b",
+                      "on-error-container": "#93000a",
+                      "on-primary-container": "#7c839b",
+                      "surface-tint": "#565e74",
+                      "on-surface": "#191c1e",
+                      "on-secondary-container": "#57657a"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "stack-md": "16px",
+                      "container-max": "1280px",
+                      "stack-xl": "64px",
+                      "stack-sm": "8px",
+                      "stack-lg": "32px",
+                      "margin-desktop": "64px",
+                      "gutter": "24px",
+                      "margin-mobile": "20px"
+              },
+              "fontFamily": {
+                      "caption": ["Manrope"],
+                      "body-md": ["Manrope"],
+                      "headline-lg-mobile": ["Manrope"],
+                      "label-md": ["Manrope"],
+                      "display": ["Manrope"],
+                      "headline-md": ["Manrope"],
+                      "headline-lg": ["Manrope"],
+                      "body-lg": ["Manrope"]
+              },
+              "fontSize": {
+                      "caption": ["12px", {"lineHeight": "16px", "letterSpacing": "0", "fontWeight": "500"}],
+                      "body-md": ["16px", {"lineHeight": "24px", "letterSpacing": "0", "fontWeight": "400"}],
+                      "headline-lg-mobile": ["24px", {"lineHeight": "32px", "letterSpacing": "0.015em", "fontWeight": "700"}],
+                      "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                      "display": ["48px", {"lineHeight": "56px", "letterSpacing": "0.02em", "fontWeight": "700"}],
+                      "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                      "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "0.015em", "fontWeight": "700"}],
+                      "body-lg": ["18px", {"lineHeight": "28px", "letterSpacing": "0", "fontWeight": "400"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        body { background-color: #f7f9fb; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .icon-fill { font-variation-settings: 'FILL' 1; }
+    </style>
+</head>
+<body class="font-body-md text-on-surface bg-background antialiased selection:bg-primary-container selection:text-on-primary-container min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<nav class="bg-surface-container-lowest fixed top-0 w-full z-50 border-b border-outline-variant">
+<div class="flex justify-between items-center h-16 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
+<div class="flex items-center gap-gutter">
+<a class="font-headline-md text-headline-md font-bold text-primary tracking-tight flex items-center gap-2" href="#">
+<span class="material-symbols-outlined text-primary">security</span>
+                Veritas AI
+            </a>
+<div class="hidden md:flex gap-6 ml-8">
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors duration-200 cursor-pointer active:opacity-70" href="#">Dashboard</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors duration-200 cursor-pointer active:opacity-70" href="#">Analytics</a>
+<a class="font-body-md text-body-md text-primary border-b-2 border-primary pb-1 hover:text-primary transition-colors duration-200 cursor-pointer active:opacity-70" href="#">Detection Log</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors duration-200 cursor-pointer active:opacity-70" href="#">Settings</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button aria-label="Notifications" class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button aria-label="Account" class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+</button>
+</div>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="flex-grow pt-[88px] pb-stack-lg px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto w-full">
+<div class="mb-stack-md flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+<div>
+<h1 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface mb-1">Email Checker</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Multi-model AI consensus analysis for email safety.</p>
+</div>
+</div>
+<!-- Top Balanced Section: Input and Consensus -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter mb-stack-lg">
+<!-- Input Section (Left) -->
+<section class="lg:col-span-8 bg-surface-container-lowest border border-outline-variant rounded-lg p-6">
+<div class="flex gap-4 border-b border-outline-variant mb-6 pb-2">
+<button class="font-label-md text-label-md text-primary border-b-2 border-primary pb-2 -mb-[9px]">Raw Text Paste</button>
+<button class="font-label-md text-label-md text-on-surface-variant hover:text-primary pb-2">File Upload</button>
+<button class="font-label-md text-label-md text-on-surface-variant hover:text-primary pb-2">Batch CSV</button>
+</div>
+<div class="mb-4">
+<label class="block font-label-md text-label-md text-on-surface mb-2" for="email-content">Email Content</label>
+<textarea class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg p-4 font-body-md text-body-md text-on-surface focus:border-primary focus:ring-0 resize-y" id="email-content" placeholder="Paste email content here..." rows="5">URGENT: Your account has been compromised! Click here immediately to verify your identity and prevent permanent suspension: http://secure-verify-update.com/login
+
+Failure to act within 24 hours will result in a $50 fee and complete loss of data. Act now!
+Best regards,
+The Security Team</textarea>
+</div>
+<div class="flex justify-end">
+<button class="bg-[#0F172A] text-on-primary font-label-md text-label-md py-2.5 px-6 rounded hover:opacity-90 transition-opacity flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">analytics</span>
+                    Analyze Content
+                </button>
+</div>
+</section>
+<!-- Overall Verdict (Right) -->
+<section class="lg:col-span-4 bg-surface-container-lowest border border-outline-variant rounded-lg p-6 flex flex-col items-center justify-between">
+<h2 class="font-label-md text-label-md text-on-surface-variant w-full text-left uppercase tracking-wider">Consensus Verdict</h2>
+<div class="relative w-40 h-40 flex items-center justify-center">
+<svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+<circle cx="50" cy="50" fill="none" r="45" stroke="#f2f4f6" stroke-width="8"></circle>
+<circle class="transition-all duration-1000 ease-out" cx="50" cy="50" fill="none" r="45" stroke="#ba1a1a" stroke-dasharray="282.7" stroke-dashoffset="35.3" stroke-width="8"></circle>
+</svg>
+<div class="absolute flex flex-col items-center">
+<span class="font-display text-display text-on-surface leading-none">87.5<span class="text-xl">%</span></span>
+<span class="font-caption text-caption text-on-surface-variant">Spam Probability</span>
+</div>
+</div>
+<div class="bg-error-container text-on-error-container border border-[#ffb4ab] font-label-md text-label-md py-2 px-6 rounded-full flex items-center gap-2 mt-4">
+<span class="material-symbols-outlined icon-fill text-[18px]">warning</span>
+                CLASSIFIED AS SPAM
+            </div>
+</section>
+</div>
+<!-- Prediction Dashboard Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter mb-stack-lg">
+<!-- Model Predictions (Left/Full width of this row) -->
+<section class="lg:col-span-12 bg-surface-container-lowest border border-outline-variant rounded-lg p-6">
+<div class="flex flex-col md:flex-row justify-between md:items-center mb-6 gap-4">
+<h2 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Model Comparison &amp; Distribution</h2>
+<select class="bg-surface-container-lowest border border-outline-variant rounded font-caption text-caption text-on-surface p-2 py-1 focus:border-primary focus:ring-0 w-fit">
+<option>View: Probability Comparison</option>
+<option>View: Confidence Intervals</option>
+</select>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<!-- Mini Cards Column -->
+<div class="grid grid-cols-2 gap-4">
+    <!-- Naive Bayes -->
+    <div class="aspect-square border border-outline-variant rounded-lg p-4 flex flex-col justify-between bg-surface-container-lowest">
+        <div>
+            <h3 class="font-label-md text-on-surface-variant uppercase tracking-wider">Naive Bayes</h3>
+            <div class="flex items-baseline gap-1 mt-1">
+                <span class="font-headline-md text-error">92%</span>
+                <span class="font-caption text-error uppercase">Spam</span>
+            </div>
+        </div>
+        <div class="w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
+            <div class="bg-error h-full" style="width: 92%"></div>
+        </div>
+    </div>
+    <!-- K-Means -->
+    <div class="aspect-square border border-outline-variant rounded-lg p-4 flex flex-col justify-between bg-surface-container-lowest">
+        <div>
+            <h3 class="font-label-md text-on-surface-variant uppercase tracking-wider">K-Means</h3>
+            <div class="flex items-baseline gap-1 mt-1">
+                <span class="font-headline-md text-secondary">45%</span>
+                <span class="font-caption text-secondary uppercase">Ham</span>
+            </div>
+        </div>
+        <div class="w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
+            <div class="bg-[#22c55e] h-full" style="width: 45%"></div>
+        </div>
+    </div>
+    <!-- Logistic Regression -->
+    <div class="aspect-square border border-outline-variant rounded-lg p-4 flex flex-col justify-between bg-surface-container-lowest">
+        <div>
+            <h3 class="font-label-md text-on-surface-variant uppercase tracking-wider">Logistic Reg</h3>
+            <div class="flex items-baseline gap-1 mt-1">
+                <span class="font-headline-md text-error">88%</span>
+                <span class="font-caption text-error uppercase">Spam</span>
+            </div>
+        </div>
+        <div class="w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
+            <div class="bg-error h-full" style="width: 88%"></div>
+        </div>
+    </div>
+    <!-- Linear SVM -->
+    <div class="aspect-square border border-outline-variant rounded-lg p-4 flex flex-col justify-between bg-surface-container-lowest">
+        <div>
+            <h3 class="font-label-md text-on-surface-variant uppercase tracking-wider">Linear SVM</h3>
+            <div class="flex items-baseline gap-1 mt-1">
+                <span class="font-headline-md text-error">95%</span>
+                <span class="font-caption text-error uppercase">Spam</span>
+            </div>
+        </div>
+        <div class="w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
+            <div class="bg-error h-full" style="width: 95%"></div>
+        </div>
+    </div>
+</div>
+<!-- Main Chart Column (Spans 2) -->
+<div class="lg:col-span-2 pt-2">
+<div class="relative h-48 flex">
+<!-- Y-Axis Labels -->
+<div class="flex flex-col justify-between h-full pr-2 font-caption text-caption text-on-surface-variant text-right w-10">
+<span class="">100%</span>
+<span class="">50%</span>
+<span class="">0%</span>
+</div>
+<!-- Chart Area -->
+<div class="relative flex-grow h-full border-b border-outline-variant">
+<!-- Grid Lines -->
+<div class="absolute inset-0 flex flex-col justify-between pointer-events-none">
+<div class="w-full border-t border-outline-variant opacity-30"></div>
+<div class="w-full border-t border-outline-variant opacity-30"></div>
+<div class="w-full border-t border-outline-variant opacity-30"></div>
+</div>
+<!-- Bars -->
+<div class="relative flex justify-around items-end h-full px-4 gap-4">
+<!-- NB -->
+<div class="flex flex-col items-center flex-1 h-full relative">
+<div class="flex items-end gap-1 h-full w-full">
+<div class="flex-1 bg-error border border-outline-variant rounded-t" style="height: 92%"></div>
+<div class="flex-1 bg-[#22c55e] border border-outline-variant rounded-t" style="height: 8%"></div>
+</div>
+<span class="font-caption text-on-surface-variant mt-2 text-center absolute -bottom-6">Naive Bayes</span>
+</div>
+<!-- KM -->
+<div class="flex flex-col items-center flex-1 h-full relative">
+<div class="flex items-end gap-1 h-full w-full">
+<div class="flex-1 bg-error border border-outline-variant rounded-t" style="height: 55%"></div>
+<div class="flex-1 bg-[#22c55e] border border-outline-variant rounded-t" style="height: 45%"></div>
+</div>
+<span class="font-caption text-on-surface-variant mt-2 text-center absolute -bottom-6">K-Means</span>
+</div>
+<!-- LR -->
+<div class="flex flex-col items-center flex-1 h-full relative">
+<div class="flex items-end gap-1 h-full w-full">
+<div class="flex-1 bg-error border border-outline-variant rounded-t" style="height: 88%"></div>
+<div class="flex-1 bg-[#22c55e] border border-outline-variant rounded-t" style="height: 12%"></div>
+</div>
+<span class="font-caption text-on-surface-variant mt-2 text-center absolute -bottom-6">Logistic Reg</span>
+</div>
+<!-- SVM -->
+<div class="flex flex-col items-center flex-1 h-full relative">
+<div class="flex items-end gap-1 h-full w-full">
+<div class="flex-1 bg-error border border-outline-variant rounded-t" style="height: 95%"></div>
+<div class="flex-1 bg-[#22c55e] border border-outline-variant rounded-t" style="height: 5%"></div>
+</div>
+<span class="font-caption text-on-surface-variant mt-2 text-center absolute -bottom-6">Linear SVM</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Feature Row: Heatmap, Radar, Keywords -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+<!-- Interactive Heatmap (Wide) -->
+<section class="lg:col-span-8 bg-surface-container-lowest border border-outline-variant rounded-lg p-6 flex flex-col">
+<div class="flex justify-between items-center mb-6">
+<h2 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">format_ink_highlighter</span>
+                    Content Heatmap
+                </h2>
+<div class="flex items-center gap-4">
+<label class="font-caption text-on-surface-variant">Threshold</label>
+<input class="w-24 accent-[#0F172A]" max="100" min="0" type="range" value="50">
+<span class="font-caption text-primary w-8">50%</span>
+</div>
+</div>
+<div class="bg-surface p-6 rounded border border-outline-variant font-body-md text-on-surface leading-relaxed min-h-[200px]">
+<span class="inline px-1 rounded transition-colors duration-200 cursor-pointer bg-error-container text-on-error-container border-b-2 border-error">URGENT: Your account has been compromised!</span>
+<span class="inline px-1 rounded transition-colors duration-200 cursor-pointer hover:bg-surface-variant">Click here immediately to verify your identity and prevent permanent suspension:</span>
+<span class="inline px-1 rounded transition-colors duration-200 cursor-pointer hover:bg-surface-variant text-blue-600 underline">http://secure-verify-update.com/login</span>
+<br><br>
+<span class="inline px-1 rounded transition-colors duration-200 cursor-pointer bg-error-container text-on-error-container border-b-2 border-error">Congratulations! You have been exclusively selected to receive a one-time cash payout of $50,000 USD.</span>
+<span class="inline px-1 rounded transition-colors duration-200 cursor-pointer hover:bg-surface-variant">Failure to act within 24 hours will result in a $50 fee and complete loss of data.</span>
+<span class="inline px-1 rounded transition-colors duration-200 cursor-pointer hover:bg-surface-variant font-semibold">Act now!</span>
+<br><br>
+<span class="text-on-surface-variant">Best regards,</span><br>
+<span class="text-on-surface-variant">The Security Team</span>
+</div>
+</section>
+<!-- Right Column: Radar & Keywords Stacked -->
+<div class="lg:col-span-4 flex flex-col gap-gutter">
+<!-- Radar Plot (Compact) -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-lg p-6 flex flex-col">
+<h2 class="font-label-md text-label-md text-on-surface-variant mb-4 uppercase tracking-wider">Feature Radar</h2>
+<div class="flex flex-col items-center justify-center gap-4">
+<div class="border border-outline-variant rounded-full flex items-center justify-center bg-surface relative w-36 h-36">
+<div class="absolute w-full h-[1px] bg-outline-variant rotate-0"></div>
+<div class="absolute w-full h-[1px] bg-outline-variant rotate-45"></div>
+<div class="absolute w-full h-[1px] bg-outline-variant rotate-90"></div>
+<div class="absolute w-full h-[1px] bg-outline-variant rotate-135"></div>
+<svg class="absolute inset-0 w-full h-full" viewBox="0 0 100 100">
+<polygon fill="rgba(186, 26, 26, 0.1)" points="50,10 80,30 85,70 50,90 15,70 20,30" stroke="#ba1a1a" stroke-width="1"></polygon>
+<polygon fill="rgba(0, 0, 0, 0.1)" points="50,30 65,45 60,65 50,75 40,65 35,45" stroke="#000000" stroke-width="1"></polygon>
+</svg>
+</div>
+<div class="flex flex-wrap justify-center gap-x-4 gap-y-1 font-caption">
+<div class="flex items-center gap-1.5"><div class="w-2.5 h-2.5 bg-primary rounded-sm"></div> This</div>
+<div class="flex items-center gap-1.5"><div class="w-2.5 h-2.5 bg-error rounded-sm"></div> Spam</div>
+<div class="flex items-center gap-1.5"><div class="w-2.5 h-2.5 bg-secondary rounded-sm"></div> Ham</div>
+</div>
+</div>
+</section>
+<!-- Keywords List -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-lg p-6">
+<h2 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider mb-4">Top Keywords</h2>
+<div class="flex flex-col gap-2">
+<div class="flex justify-between items-center p-2 rounded border border-outline-variant bg-surface">
+<span class="font-body-md text-on-surface">compromised</span>
+<span class="font-label-md px-2 py-0.5 rounded bg-error-container text-error">94%</span>
+</div>
+<div class="flex justify-between items-center p-2 rounded border border-outline-variant bg-surface">
+<span class="font-body-md text-on-surface">payout</span>
+<span class="font-label-md px-2 py-0.5 rounded bg-error-container text-error">91%</span>
+</div>
+<div class="flex justify-between items-center p-2 rounded border border-outline-variant bg-surface">
+<span class="font-body-md text-on-surface">immediately</span>
+<span class="font-label-md px-2 py-0.5 rounded bg-error-container text-error">88%</span>
+</div>
+</div>
+</section>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-lowest w-full py-stack-md mt-stack-md border-t border-outline-variant">
+<div class="flex flex-col md:flex-row justify-between items-center px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto gap-4">
+<div class="font-headline-md text-headline-md font-bold text-primary flex items-center gap-2">
+<span class="material-symbols-outlined">security</span>
+            Veritas AI
+        </div>
+<div class="flex gap-4">
+<a class="font-caption text-caption text-secondary hover:text-primary transition-all cursor-pointer" href="#">Privacy</a>
+<a class="font-caption text-caption text-secondary hover:text-primary transition-all cursor-pointer" href="#">Terms</a>
+<a class="font-caption text-caption text-secondary hover:text-primary transition-all cursor-pointer" href="#">Support</a>
+</div>
+<div class="font-caption text-caption text-secondary">
+            © 2024 Veritas AI Technologies.
+        </div>
+</div>
+</footer>
+
+
+</body></html>
