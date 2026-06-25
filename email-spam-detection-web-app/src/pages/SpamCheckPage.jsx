@@ -772,37 +772,40 @@ function SentenceHeatmap({
   )
 }
 
-function TopKeywordsCard({ text }) {
-  const keywords = useMemo(() => {
-    const suspiciousTerms = [
-      "compromised",
-      "payout",
-      "immediately",
-      "urgent",
-      "verify",
-      "suspension",
-      "selected",
-      "click",
-      "act",
-      "fee",
-    ]
-    const normalizedText = text.toLowerCase()
-    const found = suspiciousTerms
-      .filter((term) => normalizedText.includes(term))
-      .slice(0, 3)
-      .map((term, index) => ({
-        word: term,
-        score: [94, 91, 88][index] ?? Math.max(72, 86 - index * 4),
-      }))
+function SentenceTokenCard({ sentence, selectedModel }) {
+  const [tokenData, setTokenData] = useState(null)
+  const [isLoadingTokens, setIsLoadingTokens] = useState(false)
 
-    return found.length
-      ? found
-      : [
-          { word: "compromised", score: 94 },
-          { word: "payout", score: 91 },
-          { word: "immediately", score: 88 },
-        ]
-  }, [text])
+  useEffect(() => {
+    if (!sentence) {
+      setTokenData(null)
+      return
+    }
+
+    let cancelled = false
+    setIsLoadingTokens(true)
+    setTokenData(null)
+
+    fetch(`${API_BASE_URL}/predict/sentence`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sentence: sentence.text }),
+    })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((payload) => {
+        if (!cancelled && payload?.success) {
+          setTokenData(readData(payload))
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setIsLoadingTokens(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [sentence])
 
   return (
     <Card sx={cardSx}>
@@ -816,36 +819,59 @@ function TopKeywordsCard({ text }) {
         >
           Top Keywords
         </Typography>
-        <Stack spacing={1}>
-          {keywords.map((keyword) => (
-            <Paper
-              key={keyword.word}
-              variant="outlined"
-              sx={{
-                p: 1,
-                borderRadius: 1,
-                bgcolor: "#f7f9fb",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                gap: 1,
-              }}
-            >
-              <Typography variant="body2">{keyword.word}</Typography>
-              <Chip
-                size="small"
-                label={`${keyword.score}%`}
-                color="error"
-                variant="outlined"
-                sx={{ height: 24, fontWeight: 800, bgcolor: "#ffdad6" }}
-              />
-            </Paper>
-          ))}
-        </Stack>
+
+        {!sentence ? (
+          <Typography variant="body2" color="text.secondary">
+            Click a sentence in the heatmap to inspect its top spam-triggering tokens.
+          </Typography>
+        ) : isLoadingTokens ? (
+          <Stack alignItems="center" sx={{ py: 2 }}>
+            <CircularProgress size={24} />
+          </Stack>
+        ) : tokenData?.tokens?.length ? (
+          <Stack spacing={1}>
+            {tokenData.tokens
+              .map((t) => ({
+                word: t.token,
+                score: percent(t.models?.[selectedModel]?.spam_probability),
+              }))
+              .sort((a, b) => b.score - a.score)
+              .slice(0, 6)
+              .map((kw) => (
+                <Paper
+                  key={kw.word}
+                  variant="outlined"
+                  sx={{
+                    p: 1,
+                    borderRadius: 1,
+                    bgcolor: "#f7f9fb",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: 1,
+                  }}
+                >
+                  <Typography variant="body2">{kw.word}</Typography>
+                  <Chip
+                    size="small"
+                    label={`${kw.score}%`}
+                    color={kw.score >= 50 ? "error" : "default"}
+                    variant="outlined"
+                    sx={{ height: 24, fontWeight: 800, bgcolor: kw.score >= 50 ? "#ffdad6" : undefined }}
+                  />
+                </Paper>
+              ))}
+          </Stack>
+        ) : (
+          <Typography variant="body2" color="text.secondary">
+            No keyword tokens found for this sentence.
+          </Typography>
+        )}
       </CardContent>
     </Card>
   )
 }
+
 
 function CsvBatchDashboard({ result }) {
   if (!result) {
@@ -1178,7 +1204,10 @@ export default function SpamCheckPage() {
                 features={emailFeatures}
                 averages={featureAverages}
               />
-              <TopKeywordsCard text={pastedEmailText} />
+              <SentenceTokenCard
+                sentence={selectedSentence}
+                selectedModel={selectedModel}
+              />
             </Stack>
           </Box>
         </Stack>

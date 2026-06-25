@@ -137,9 +137,19 @@ async def predict_email(
     combined_text = await _extract_real_body(file, body, subject)
     if sender:
         combined_text = f"{sender} {combined_text}"
-        
+
+    df = extract_features(pd.Series([combined_text]))
     overall_models = _get_real_model_predictions(combined_text)
-    
+
+    # Pull the 9 numeric feature values from the DataFrame row
+    feature_cols = [
+        "num_urls", "num_exclamation", "num_question", "num_dollar",
+        "num_all_caps", "num_numbers", "word_count", "capital_ratio", "emoji_count",
+    ]
+    features_dict = {
+        col: float(df.iloc[0][col]) for col in feature_cols if col in df.columns
+    }
+
     sentence_predictions = [
         {
             "text": sentence,
@@ -150,7 +160,11 @@ async def predict_email(
 
     return PredictionResponse(
         success=True,
-        data=PredictionResult(models=overall_models, sentences=sentence_predictions),
+        data=PredictionResult(
+            models=overall_models,
+            sentences=sentence_predictions,
+            features=features_dict,
+        ),
         error=None,
     )
 

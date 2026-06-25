@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field
 
@@ -29,6 +29,9 @@ class PredictionResult(BaseModel):
     )
     sentences: List[SentencePrediction] = Field(
         ..., description="Sentence-level prediction breakdown"
+    )
+    features: Optional[Dict[str, Any]] = Field(
+        None, description="Extracted numeric features for the full email (e.g. num_urls, word_count)"
     )
 
 
