@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Spam Detector - Single Email Prediction</title>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Theme Configuration -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "error-container": "#ffdad6",
+                    "surface-container-lowest": "#ffffff",
+                    "on-primary": "#ffffff",
+                    "surface-variant": "#e0e3e5",
+                    "surface": "#f7f9fb",
+                    "secondary-fixed": "#d5e3fc",
+                    "inverse-surface": "#2d3133",
+                    "on-secondary-fixed": "#0d1c2e",
+                    "primary-container": "#131b2e",
+                    "surface-tint": "#565e74",
+                    "on-secondary-fixed-variant": "#3a485b",
+                    "primary-fixed-dim": "#bec6e0",
+                    "on-error": "#ffffff",
+                    "tertiary": "#000000",
+                    "on-tertiary-fixed": "#271901",
+                    "on-tertiary": "#ffffff",
+                    "outline": "#76777d",
+                    "inverse-on-surface": "#eff1f3",
+                    "secondary-container": "#d5e3fc",
+                    "inverse-primary": "#bec6e0",
+                    "tertiary-container": "#271901",
+                    "surface-bright": "#f7f9fb",
+                    "tertiary-fixed-dim": "#dec29a",
+                    "on-surface-variant": "#45464d",
+                    "primary": "#000000",
+                    "on-primary-fixed": "#131b2e",
+                    "on-background": "#191c1e",
+                    "on-secondary-container": "#57657a",
+                    "surface-container-low": "#f2f4f6",
+                    "on-surface": "#191c1e",
+                    "on-primary-container": "#7c839b",
+                    "on-primary-fixed-variant": "#3f465c",
+                    "error": "#ba1a1a",
+                    "on-secondary": "#ffffff",
+                    "on-tertiary-fixed-variant": "#574425",
+                    "surface-dim": "#d8dadc",
+                    "secondary-fixed-dim": "#b9c7df",
+                    "background": "#f7f9fb",
+                    "outline-variant": "#c6c6cd",
+                    "tertiary-fixed": "#fcdeb5",
+                    "surface-container": "#eceef0",
+                    "on-error-container": "#93000a",
+                    "surface-container-highest": "#e0e3e5",
+                    "secondary": "#515f74",
+                    "primary-fixed": "#dae2fd",
+                    "surface-container-high": "#e6e8ea",
+                    "on-tertiary-container": "#98805d"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "margin-desktop": "64px",
+                    "stack-xl": "64px",
+                    "stack-lg": "32px",
+                    "stack-sm": "8px",
+                    "container-max": "1280px",
+                    "gutter": "24px",
+                    "margin-mobile": "20px",
+                    "stack-md": "16px"
+            },
+            "fontFamily": {
+                    "body-md": [
+                            "Manrope", "sans-serif"
+                    ],
+                    "caption": [
+                            "Manrope", "sans-serif"
+                    ],
+                    "headline-md": [
+                            "Manrope", "sans-serif"
+                    ],
+                    "headline-lg": [
+                            "Manrope", "sans-serif"
+                    ],
+                    "label-md": [
+                            "Manrope", "sans-serif"
+                    ],
+                    "display": [
+                            "Manrope", "sans-serif"
+                    ],
+                    "body-lg": [
+                            "Manrope", "sans-serif"
+                    ],
+                    "headline-lg-mobile": [
+                            "Manrope", "sans-serif"
+                    ]
+            },
+            "fontSize": {
+                    "body-md": [
+                            "16px",
+                            {
+                                    "lineHeight": "24px",
+                                    "letterSpacing": "0",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "caption": [
+                            "12px",
+                            {
+                                    "lineHeight": "16px",
+                                    "letterSpacing": "0",
+                                    "fontWeight": "500"
+                            }
+                    ],
+                    "headline-md": [
+                            "24px",
+                            {
+                                    "lineHeight": "32px",
+                                    "letterSpacing": "0.01em",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "headline-lg": [
+                            "32px",
+                            {
+                                    "lineHeight": "40px",
+                                    "letterSpacing": "0.015em",
+                                    "fontWeight": "700"
+                            }
+                    ],
+                    "label-md": [
+                            "14px",
+                            {
+                                    "lineHeight": "20px",
+                                    "letterSpacing": "0.05em",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "display": [
+                            "48px",
+                            {
+                                    "lineHeight": "56px",
+                                    "letterSpacing": "0.02em",
+                                    "fontWeight": "700"
+                            }
+                    ],
+                    "body-lg": [
+                            "18px",
+                            {
+                                    "lineHeight": "28px",
+                                    "letterSpacing": "0",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "headline-lg-mobile": [
+                            "24px",
+                            {
+                                    "lineHeight": "32px",
+                                    "letterSpacing": "0.015em",
+                                    "fontWeight": "700"
+                            }
+                    ]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        /* Setup for Google Fonts */
+        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Manrope', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-surface-container-lowest text-on-surface font-body-md min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<header class="bg-surface-container-lowest dark:bg-inverse-surface border-b border-outline-variant dark:border-outline fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-desktop h-16 max-w-container-max mx-auto right-0">
+<div class="text-headline-md font-headline-md font-bold text-primary dark:text-inverse-primary">
+            Spam Detector
+        </div>
+<nav class="hidden md:flex gap-8 items-center font-label-md text-label-md">
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-inverse-primary transition-colors duration-200" href="#">Home</a>
+<a class="text-primary dark:text-inverse-primary border-b-2 border-primary dark:border-inverse-primary pb-1 opacity-80 transition-opacity" href="#">Email Checker</a>
+</nav>
+<button class="bg-primary text-on-primary font-label-md text-label-md px-4 py-2 rounded">
+            Analyze Email
+        </button>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow pt-[88px] pb-stack-xl px-margin-desktop w-full max-w-container-max mx-auto">
+<div class="grid grid-cols-1 md:grid-cols-12 gap-gutter">
+<!-- Input Section (Full Width Top) -->
+<section class="col-span-12 mb-stack-lg">
+<div class="border border-outline-variant rounded-lg bg-surface-container-lowest p-stack-lg">
+<div class="flex gap-6 border-b border-outline-variant mb-6 pb-2">
+<button class="text-primary font-label-md border-b-2 border-primary pb-2 -mb-[10px]">Raw Text Paste</button>
+<button class="text-on-surface-variant font-label-md pb-2 -mb-[10px] hover:text-primary transition-colors">Single File Upload</button>
+<button class="text-on-surface-variant font-label-md pb-2 -mb-[10px] hover:text-primary transition-colors">CSV Batch Upload</button>
+</div>
+<div class="mb-6">
+<label class="block font-label-md text-on-surface mb-2">Email Content</label>
+<textarea class="w-full h-48 border border-outline-variant rounded-lg p-4 font-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-shadow" placeholder="Paste email headers and body here...">Return-Path: &lt;offers@unbelievable-prizes.com&gt;
+Subject: URGENT: Your Account Has Been Selected for a $50,000 Payout!
+Date: Thu, 24 Aug 2024 14:22:10 +0000
+
+Dear Valued Customer,
+
+Congratulations! You have been exclusively selected to receive a one-time cash payout of $50,000 USD. This is not a drill!
+
+Click the link below immediately to claim your funds before they expire in 24 hours.
+
+http://claim-your-reward-now-secure-portal.com/login
+
+Do not share this link with anyone. Act fast!
+
+Best,
+The Prize Team</textarea>
+</div>
+<div class="flex justify-end">
+<button class="bg-primary text-on-primary font-label-md px-6 py-3 rounded-lg hover:bg-on-secondary-fixed transition-colors">
+                            Analyze Content
+                        </button>
+</div>
+</div>
+</section>
+<!-- Left Column: Results & Analysis -->
+<div class="col-span-12 md:col-span-8 flex flex-col gap-stack-xl">
+<!-- Overall & Comparative Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-gutter">
+<!-- Overall Result -->
+<div class="border border-outline-variant rounded-lg p-stack-lg bg-surface-bright flex flex-col items-center justify-center text-center">
+<h2 class="font-headline-md text-on-surface mb-6 w-full text-left">Overall Assessment</h2>
+<div class="relative w-32 h-32 mb-6 flex items-center justify-center">
+<svg class="w-full h-full transform -rotate-90" viewbox="0 0 36 36">
+<path class="text-surface-variant" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="100, 100" stroke-width="3"></path>
+<path class="text-error" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="87.5, 100" stroke-width="3"></path>
+</svg>
+<span class="absolute font-headline-md text-primary">87.5%</span>
+</div>
+<div class="bg-error-container text-on-error-container border border-error px-4 py-2 rounded-full font-label-md mb-2">
+                            CLASSIFIED AS SPAM
+                        </div>
+<p class="font-caption text-on-surface-variant">High confidence prediction based on ensemble vote.</p>
+</div>
+<!-- Comparative Grid -->
+<div class="flex flex-col gap-4">
+<div class="flex justify-between items-center mb-2">
+<h3 class="font-label-md text-on-surface">Model Predictions</h3>
+</div>
+<div class="grid grid-cols-2 gap-stack-sm flex-grow">
+<div class="border border-outline-variant rounded p-4 flex flex-col justify-between">
+<span class="font-caption text-on-surface-variant">Naive Bayes</span>
+<span class="font-label-md text-error">Spam (92%)</span>
+</div>
+<div class="border border-outline-variant rounded p-4 flex flex-col justify-between">
+<span class="font-caption text-on-surface-variant">K-Means Clustering</span>
+<span class="font-label-md text-secondary">Ham (45%)</span>
+</div>
+<div class="border border-outline-variant rounded p-4 flex flex-col justify-between">
+<span class="font-caption text-on-surface-variant">Logistic Regression</span>
+<span class="font-label-md text-error">Spam (88%)</span>
+</div>
+<div class="border border-outline-variant rounded p-4 flex flex-col justify-between">
+<span class="font-caption text-on-surface-variant">Linear SVM</span>
+<span class="font-label-md text-error">Spam (95%)</span>
+</div>
+</div>
+<div class="mt-4 border border-outline-variant rounded flex overflow-hidden">
+<div class="bg-surface-variant px-3 py-2 font-caption text-on-surface-variant flex items-center border-r border-outline-variant">
+                                Active Classifier
+                            </div>
+<select class="flex-grow bg-transparent border-none font-label-md text-primary py-2 px-3 focus:ring-0 cursor-pointer">
+<option>Naive Bayes</option>
+<option>K-Means Clustering</option>
+<option>Logistic Regression</option>
+<option>Linear SVM</option>
+</select>
+</div>
+</div>
+</div>
+<!-- Feature Analysis (Radar Chart Placeholder) -->
+<div class="border border-outline-variant rounded-lg p-stack-lg">
+<h2 class="font-headline-md text-on-surface mb-6">Feature Analysis</h2>
+<div class="flex flex-col md:flex-row gap-8 items-center justify-center">
+<div class="w-64 h-64 border border-outline-variant rounded-full flex items-center justify-center bg-surface relative">
+<!-- Minimalist placeholder for radar chart -->
+<div class="absolute w-full h-[1px] bg-outline-variant rotate-0"></div>
+<div class="absolute w-full h-[1px] bg-outline-variant rotate-45"></div>
+<div class="absolute w-full h-[1px] bg-outline-variant rotate-90"></div>
+<div class="absolute w-full h-[1px] bg-outline-variant rotate-135"></div>
+<svg class="absolute inset-0 w-full h-full" viewbox="0 0 100 100">
+<polygon fill="rgba(186, 26, 26, 0.1)" points="50,10 80,30 85,70 50,90 15,70 20,30" stroke="#ba1a1a" stroke-width="1"></polygon>
+<polygon fill="rgba(0, 0, 0, 0.1)" points="50,30 65,45 60,65 50,75 40,65 35,45" stroke="#000000" stroke-width="1"></polygon>
+</svg>
+<span class="font-caption text-on-surface-variant absolute bg-surface px-1">Radar Plot</span>
+</div>
+<div class="flex flex-col gap-4 font-caption">
+<div class="flex items-center gap-2"><div class="w-3 h-3 bg-primary rounded-sm"></div> This Email</div>
+<div class="flex items-center gap-2"><div class="w-3 h-3 bg-error rounded-sm"></div> Spam Average</div>
+<div class="flex items-center gap-2"><div class="w-3 h-3 bg-secondary rounded-sm"></div> Ham Average</div>
+</div>
+</div>
+</div>
+<!-- Interactive Heatmap -->
+<div class="border border-outline-variant rounded-lg p-stack-lg">
+<div class="flex justify-between items-center mb-6">
+<h2 class="font-headline-md text-on-surface">Interactive Heatmap</h2>
+<div class="flex items-center gap-4">
+<label class="font-caption text-on-surface-variant">Highlight Threshold</label>
+<input class="w-32 accent-primary" max="100" min="0" type="range" value="50"/>
+<span class="font-caption text-primary">50%</span>
+</div>
+</div>
+<div class="bg-surface p-6 rounded border border-outline-variant font-body-md text-on-surface leading-loose">
+<span class="inline px-1 rounded transition-colors duration-200 cursor-pointer hover:bg-surface-variant">Dear Valued Customer,</span>
+<span class="inline px-1 rounded transition-colors duration-200 cursor-pointer bg-error-container text-on-error-container">Congratulations! You have been exclusively selected to receive a one-time cash payout of $50,000 USD.</span>
+<span class="inline px-1 rounded transition-colors duration-200 cursor-pointer hover:bg-surface-variant">This is not a drill!</span>
+<span class="inline px-1 rounded transition-colors duration-200 cursor-pointer bg-error-container text-on-error-container border border-error font-semibold">Click the link below immediately to claim your funds before they expire in 24 hours.</span>
+<span class="inline px-1 rounded transition-colors duration-200 cursor-pointer hover:bg-surface-variant text-blue-600 underline">http://claim-your-reward-now-secure-portal.com/login</span>
+<span class="inline px-1 rounded transition-colors duration-200 cursor-pointer hover:bg-surface-variant">Do not share this link with anyone.</span>
+<span class="inline px-1 rounded transition-colors duration-200 cursor-pointer hover:bg-surface-variant">Act fast!</span>
+</div>
+</div>
+</div>
+<!-- Right Column: Detail Drawer -->
+<div class="col-span-12 md:col-span-4">
+<div class="border border-outline-variant rounded-lg p-stack-lg h-full bg-surface-container-lowest sticky top-[88px]">
+<div class="flex items-center gap-2 mb-6 pb-4 border-b border-outline-variant">
+<span class="material-symbols-outlined text-primary">analytics</span>
+<h2 class="font-headline-md text-on-surface">Sentence Detail</h2>
+</div>
+<div class="mb-6">
+<h3 class="font-label-md text-on-surface-variant mb-2">Selected Segment</h3>
+<p class="font-body-md text-on-surface p-4 bg-surface rounded border border-outline-variant border-l-4 border-l-error">
+                            "Click the link below immediately to claim your funds before they expire in 24 hours."
+                        </p>
+</div>
+<div class="mb-6">
+<h3 class="font-label-md text-on-surface-variant mb-4">Probability Breakdown</h3>
+<!-- Simple CSS Bar Chart -->
+<div class="flex flex-col gap-4">
+<div>
+<div class="flex justify-between font-caption mb-1">
+<span>Naive Bayes</span>
+<span class="text-error font-bold">98%</span>
+</div>
+<div class="w-full bg-surface-variant h-2 rounded-full overflow-hidden">
+<div class="bg-error h-full" style="width: 98%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between font-caption mb-1">
+<span>K-Means</span>
+<span>40%</span>
+</div>
+<div class="w-full bg-surface-variant h-2 rounded-full overflow-hidden">
+<div class="bg-secondary h-full" style="width: 40%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between font-caption mb-1">
+<span>Logistic Regression</span>
+<span class="text-error font-bold">85%</span>
+</div>
+<div class="w-full bg-surface-variant h-2 rounded-full overflow-hidden">
+<div class="bg-error h-full" style="width: 85%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between font-caption mb-1">
+<span>Linear SVM</span>
+<span class="text-error font-bold">99%</span>
+</div>
+<div class="w-full bg-surface-variant h-2 rounded-full overflow-hidden">
+<div class="bg-error h-full" style="width: 99%"></div>
+</div>
+</div>
+</div>
+</div>
+<div>
+<h3 class="font-label-md text-on-surface-variant mb-2">Key Indicators</h3>
+<div class="flex flex-wrap gap-2">
+<span class="border border-outline-variant px-2 py-1 rounded font-caption bg-surface">Urgency ("immediately")</span>
+<span class="border border-outline-variant px-2 py-1 rounded font-caption bg-surface">Call to Action ("Click the link")</span>
+<span class="border border-outline-variant px-2 py-1 rounded font-caption bg-surface">Time Constraint ("24 hours")</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="w-full py-stack-lg px-margin-desktop flex flex-col md:flex-row justify-between items-center max-w-container-max mx-auto border-t border-outline-variant dark:border-outline bg-surface-container-lowest dark:bg-inverse-surface mt-auto">
+<div class="flex flex-col md:flex-row items-center gap-4">
+<span class="text-label-md font-label-md font-bold text-primary dark:text-inverse-primary">Spam Detector</span>
+<span class="font-caption text-caption text-on-surface dark:text-inverse-on-surface">© 2024 Spam Detector. Swinburne University Research Project.</span>
+</div>
+<div class="flex gap-6 mt-4 md:mt-0 font-caption text-caption">
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-inverse-primary transition-colors" href="#">Privacy Policy</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-inverse-primary transition-colors" href="#">Terms of Service</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-inverse-primary transition-colors" href="#">Documentation</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-inverse-primary transition-colors" href="#">Support</a>
+</div>
+</footer>
+</body></html>
