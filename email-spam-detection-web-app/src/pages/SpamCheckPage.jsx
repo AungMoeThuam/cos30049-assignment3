@@ -1386,61 +1386,161 @@ function SimpleWordCloud({ words }) {
     );
   }
 
-  const maxCount = Math.max(...words.map((w) => w.count), 1);
-  const minCount = Math.min(...words.map((w) => w.count), 0);
-
-  const getFontSize = (count) => {
-    if (maxCount === minCount) return 24;
-    const ratio = (count - minCount) / (maxCount - minCount);
-    return 14 + ratio * 46;
-  };
-
-  const getColor = (count) => {
-    if (maxCount === minCount) return d3.interpolateReds(0.7);
-    const ratio = (count - minCount) / (maxCount - minCount);
-    return d3.interpolateReds(0.4 + ratio * 0.5);
-  };
-
   return (
     <Box
       sx={{
         display: "flex",
-        flexWrap: "wrap",
-        gap: 3,
         justifyContent: "center",
         alignItems: "center",
-        minHeight: 200,
-        p: 4,
-        bgcolor: "#f7f9fb",
+        minHeight: 260,
+        p: 2,
+        bgcolor: "#f8fafc",
         borderRadius: 2,
         border: "1px dashed",
         borderColor: "divider",
       }}
     >
-      {words.map((word) => (
-        <Box
-          key={word.word}
-          title={`${word.percentage}% (${word.count} occurrences)`}
-          sx={{
-            cursor: "pointer",
-            transition: "transform 0.2s",
-            "&:hover": {
-              transform: "scale(1.1)",
-            },
-          }}
-        >
-          <Typography
-            sx={{
-              fontSize: getFontSize(word.count),
-              fontWeight: 800,
-              color: getColor(word.count),
-              lineHeight: 1,
-            }}
+      {(() => {
+        const width = 500;
+        const height = 250;
+
+        const maxCount = Math.max(...words.map((w) => w.count), 1);
+        const minCount = Math.min(...words.map((w) => w.count), 0);
+
+        const getFontSize = (count) => {
+          if (maxCount === minCount) return 24;
+          const ratio = (count - minCount) / (maxCount - minCount);
+          return Math.round(12 + ratio * 28); // 12px to 40px
+        };
+
+        const getWordColor = (percentage) => {
+          if (percentage >= 80) return "#b91c1c"; // Obvious Red (Red 700)
+          if (percentage >= 50) return "#ca8a04"; // Obvious Gold (Yellow 600)
+          return "#64748b"; // Ham Gray (Slate 500)
+        };
+
+        const placed = [];
+        const intersects = (b1, b2) => {
+          return (
+            b1.x < b2.x + b2.width &&
+            b1.x + b1.width > b2.x &&
+            b1.y < b2.y + b2.height &&
+            b1.y + b1.height > b2.y
+          );
+        };
+
+        const sortedWords = [...words].sort((a, b) => b.count - a.count);
+
+        sortedWords.forEach((wordInfo) => {
+          const text = wordInfo.word.toUpperCase();
+          const fontSize = getFontSize(wordInfo.count);
+          const w = text.length * fontSize * 0.55;
+          const h = fontSize;
+
+          let x = width / 2;
+          let y = height / 2;
+          let theta = Math.random() * Math.PI * 2;
+          let radius = 0;
+          let found = false;
+          let attempts = 0;
+          const maxAttempts = 1000;
+
+          while (!found && attempts < maxAttempts) {
+            attempts++;
+            const box = {
+              x: x - w / 2,
+              y: y - h / 2,
+              width: w,
+              height: h,
+            };
+
+            let overlap = false;
+            const padding = 2; // tight packing
+            const paddedBox = {
+              x: box.x - padding,
+              y: box.y - padding,
+              width: box.width + padding * 2,
+              height: box.height + padding * 2,
+            };
+
+            for (const other of placed) {
+              if (intersects(paddedBox, other)) {
+                overlap = true;
+                break;
+              }
+            }
+
+            if (
+              box.x < 5 ||
+              box.x + box.width > width - 5 ||
+              box.y < 5 ||
+              box.y + box.height > height - 5
+            ) {
+              overlap = true;
+            }
+
+            if (!overlap) {
+              placed.push({ ...box, word: text, fontSize, percentage: wordInfo.percentage, count: wordInfo.count });
+              found = true;
+            } else {
+              radius += 0.5;
+              theta += 0.12;
+              x = width / 2 + Math.cos(theta) * radius;
+              y = height / 2 + Math.sin(theta) * radius;
+            }
+          }
+
+          if (!found) {
+            placed.push({
+              x: Math.random() * (width - w - 10) + 5,
+              y: Math.random() * (height - h - 10) + 5,
+              width: w,
+              height: h,
+              word: text,
+              fontSize,
+              percentage: wordInfo.percentage,
+              count: wordInfo.count,
+            });
+          }
+        });
+
+        return (
+          <Box
+            component="svg"
+            viewBox={`0 0 ${width} ${height}`}
+            sx={{ width: "100%", height: "100%", maxHeight: height, overflow: "visible" }}
           >
-            {word.word}
-          </Typography>
-        </Box>
-      ))}
+            {placed.map((item, idx) => (
+              <text
+                key={`${item.word}-${idx}`}
+                x={item.x + item.width / 2}
+                y={item.y + item.height - (item.fontSize * 0.1)}
+                textAnchor="middle"
+                title={`${item.percentage}% of spam emails contain this (${item.count} occurrences)`}
+                style={{
+                  fontSize: `${item.fontSize}px`,
+                  fontWeight: 900,
+                  fill: getWordColor(item.percentage),
+                  fontFamily: '"Impact", "Anton", "Arial Black", sans-serif',
+                  cursor: "default",
+                  transition: "transform 0.15s ease, fill-opacity 0.15s ease",
+                  transformOrigin: `${item.x + item.width / 2}px ${item.y + item.height / 2}px`,
+                }}
+                onMouseOver={(e) => {
+                  e.target.style.transform = "scale(1.15)";
+                  e.target.style.fillOpacity = "0.8";
+                }}
+                onMouseOut={(e) => {
+                  e.target.style.transform = "scale(1)";
+                  e.target.style.fillOpacity = "1";
+                }}
+              >
+                {item.word}
+              </text>
+            ))}
+          </Box>
+        );
+      })()}
     </Box>
   );
 }
