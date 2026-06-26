@@ -373,14 +373,14 @@ function ModelComparison({ result, selectedModel, onSelectedModelChange }) {
                     selectedModel === key ? "text.primary" : "divider",
                 }}
               >
-                <Box>
-                  <Typography
-                    variant="caption"
-                    color="text.secondary"
-                    textTransform="uppercase"
-                  >
-                    {label}
-                  </Typography>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  textTransform="uppercase"
+                >
+                  {label}
+                </Typography>
+                <Box sx={{ mt: 1.5 }}>
                   <Typography
                     fontWeight={900}
                     color={
@@ -388,6 +388,7 @@ function ModelComparison({ result, selectedModel, onSelectedModelChange }) {
                         ? `${verdictColor(prediction.label)}.main`
                         : "text.secondary"
                     }
+                    sx={{ mb: 0.5 }}
                   >
                     {getConfidence(prediction)}%{" "}
                     <Box
@@ -397,16 +398,16 @@ function ModelComparison({ result, selectedModel, onSelectedModelChange }) {
                       {prediction?.label ?? "Pending"}
                     </Box>
                   </Typography>
+                  <LinearProgress
+                    variant="determinate"
+                    value={Math.max(
+                      percent(prediction?.spam_probability),
+                      percent(prediction?.ham_probability),
+                    )}
+                    color={prediction?.label === "ham" ? "success" : "error"}
+                    sx={{ height: 6, borderRadius: 1 }}
+                  />
                 </Box>
-                <LinearProgress
-                  variant="determinate"
-                  value={Math.max(
-                    percent(prediction?.spam_probability),
-                    percent(prediction?.ham_probability),
-                  )}
-                  color={prediction?.label === "ham" ? "success" : "error"}
-                  sx={{ height: 6, borderRadius: 1 }}
-                />
               </Paper>
             ))}
           </Box>
