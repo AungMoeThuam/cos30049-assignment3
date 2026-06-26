@@ -846,7 +846,8 @@ function FeatureRadarChart({ features, averages }) {
                     variant="body2" 
                     sx={{ 
                       fontWeight: 600,
-                      textDecoration: isHidden ? "line-through" : "none"
+                      textDecoration: isHidden ? "line-through" : "none",
+                      lineHeight: 1,
                     }}
                   >
                     {item.label}
@@ -1386,7 +1387,7 @@ function GroupedBarChart({ summaries, models }) {
                 borderRadius: 0.5,
               }}
             />
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1 }}>
               Spam
             </Typography>
           </Stack>
@@ -1399,7 +1400,7 @@ function GroupedBarChart({ summaries, models }) {
                 borderRadius: 0.5,
               }}
             />
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1 }}>
               Ham
             </Typography>
           </Stack>
