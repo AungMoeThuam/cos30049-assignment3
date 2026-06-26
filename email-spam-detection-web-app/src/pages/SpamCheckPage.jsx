@@ -286,8 +286,8 @@ function ModelComparison({ result, selectedModel, onSelectedModelChange }) {
   }));
 
   return (
-    <Card sx={cardSx} id="export-model-comparison">
-      <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
+    <Card sx={{ ...cardSx, height: "100%", display: "flex", flexDirection: "column" }} id="export-model-comparison">
+      <CardContent sx={{ p: 2, "&:last-child": { pb: 2 }, display: "flex", flexDirection: "column", flexGrow: 1 }}>
         <Box
           sx={{
             display: "flex",
@@ -346,7 +346,8 @@ function ModelComparison({ result, selectedModel, onSelectedModelChange }) {
               lg: "minmax(220px, 0.9fr) minmax(0, 2fr)",
             },
             gap: 3,
-            mb: 3.5,
+            flexGrow: 1,
+            mb: 1,
           }}
         >
           <Box
@@ -354,6 +355,7 @@ function ModelComparison({ result, selectedModel, onSelectedModelChange }) {
               display: "grid",
               gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
               gap: 1.5,
+              height: "100%",
             }}
           >
             {predictions.map(({ key, label, prediction }) => (
@@ -362,7 +364,7 @@ function ModelComparison({ result, selectedModel, onSelectedModelChange }) {
                 variant="outlined"
                 sx={{
                   p: 1.25,
-                  minHeight: 100,
+                  height: "100%",
                   borderRadius: 1.5,
                   display: "flex",
                   flexDirection: "column",
@@ -429,7 +431,13 @@ function ModelComparison({ result, selectedModel, onSelectedModelChange }) {
             }}
           >
             <Box
-              sx={{ display: "grid", gridTemplateColumns: "36px 1fr", gap: 1 }}
+              sx={{
+                display: "grid",
+                gridTemplateColumns: "36px 1fr",
+                gap: 1,
+                height: "100%",
+                alignItems: "end",
+              }}
             >
               <Box
                 sx={{
@@ -437,7 +445,7 @@ function ModelComparison({ result, selectedModel, onSelectedModelChange }) {
                   flexDirection: "column",
                   justifyContent: "space-between",
                   alignItems: "flex-end",
-                  height: 180,
+                  height: "calc(100% - 24px)",
                   pr: 0.5,
                 }}
               >
@@ -460,7 +468,8 @@ function ModelComparison({ result, selectedModel, onSelectedModelChange }) {
               </Box>
               <Box
                 sx={{
-                  height: 180,
+                  height: "calc(100% - 24px)",
+                  minHeight: 180,
                   position: "relative",
                   borderBottom: "1px solid",
                   borderColor: "divider",
@@ -848,8 +857,8 @@ function FeatureRadarChart({ features, averages }) {
   }, [hasEmailFeatures, getNormalized, series, hiddenSeries]);
 
   return (
-    <Card sx={cardSx} id="export-radar-chart">
-      <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
+    <Card sx={{ ...cardSx, height: "100%", display: "flex", flexDirection: "column" }} id="export-radar-chart">
+      <CardContent sx={{ p: 2, "&:last-child": { pb: 2 }, display: "flex", flexDirection: "column", flexGrow: 1 }}>
         <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
           <Box>
             <Typography variant="caption" color="text.secondary" display="block">
