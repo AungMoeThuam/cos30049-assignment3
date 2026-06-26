@@ -1603,6 +1603,13 @@ export default function SpamCheckPage() {
     };
   }, []);
 
+  useEffect(() => {
+    setSingleAnalysisResult(null);
+    setCsvAnalysisResult(null);
+    setSelectedSentence(null);
+    setErrorMessage("");
+  }, [activeTab]);
+
   const activePrediction = getModelPrediction(
     singleAnalysisResult,
     selectedModel,
