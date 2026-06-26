@@ -1551,7 +1551,7 @@ export default function SpamCheckPage() {
           display: "grid",
           gridTemplateColumns: {
             xs: "1fr",
-            lg: "minmax(0, 8fr) minmax(280px, 4fr)",
+            lg: activeTab === 2 ? "1fr" : "minmax(0, 8fr) minmax(280px, 4fr)",
           },
           gap: 2,
           mb: 2,
@@ -1649,7 +1649,9 @@ export default function SpamCheckPage() {
           </CardContent>
         </Card>
 
-        <OverallAssessment prediction={activePrediction} />
+        {activeTab !== 2 && (
+          <OverallAssessment prediction={activePrediction} />
+        )}
       </Box>
 
       {activeTab === 2 || csvAnalysisResult ? (
