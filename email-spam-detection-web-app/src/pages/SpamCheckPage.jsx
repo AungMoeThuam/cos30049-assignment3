@@ -1034,7 +1034,8 @@ function SentenceHeatmap({
             bgcolor: "#f7f9fb",
             borderRadius: 2,
             lineHeight: 2.1,
-            maxHeight: 280,
+            flex: 1,
+            minHeight: 0,
             overflowY: "auto",
             "&::-webkit-scrollbar": {
               width: "6px",
@@ -1165,7 +1166,7 @@ function SentenceTokenCard({ sentence, selectedModel }) {
           <Box
             sx={{
               overflowY: "auto",
-              maxHeight: 280,
+              maxHeight: 310,
               pr: 0.5,
               "&::-webkit-scrollbar": {
                 width: "6px",
