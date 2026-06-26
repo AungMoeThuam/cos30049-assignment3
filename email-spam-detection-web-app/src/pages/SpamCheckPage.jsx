@@ -1034,8 +1034,7 @@ function SentenceHeatmap({
             bgcolor: "#f7f9fb",
             borderRadius: 2,
             lineHeight: 2.1,
-            flex: 1,
-            minHeight: 0,
+            maxHeight: 280,
             overflowY: "auto",
             "&::-webkit-scrollbar": {
               width: "6px",
