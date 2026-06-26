@@ -200,6 +200,7 @@ async def predict_csv(
         name: {
             "spam": 0,
             "ham": 0,
+            "total_confidence": 0.0,
             "confidence_distribution": {f"{i*10}-{(i+1)*10}%": 0 for i in range(10)}
         }
         for name in MODEL_NAMES
@@ -224,6 +225,8 @@ async def predict_csv(
         for name, res in results.items():
             if "error" not in res:
                 conf = float(res.get("confidence", 0.0))
+                model_summaries[name]["total_confidence"] += conf
+                
                 bucket_idx = min(9, int(conf * 10))
                 bucket_key = f"{bucket_idx * 10}-{(bucket_idx + 1) * 10}%"
                 model_summaries[name]["confidence_distribution"][bucket_key] += 1
@@ -271,6 +274,7 @@ async def predict_csv(
         name: ModelBatchSummary(
             spam_count=counts["spam"], 
             ham_count=counts["ham"], 
+            average_confidence=counts["total_confidence"] / total_emails if total_emails > 0 else 0.0,
             confidence_distribution=counts["confidence_distribution"]
         )
         for name, counts in model_summaries.items()
