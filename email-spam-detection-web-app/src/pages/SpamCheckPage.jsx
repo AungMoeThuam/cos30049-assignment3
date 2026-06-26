@@ -993,7 +993,7 @@ function SentenceHeatmap({
               <Typography
                 variant="body2"
                 color="text.secondary"
-                sx={{ maxWidth: 300 }}
+                sx={{ maxWidth: 480 }}
               >
                 Adjust the threshold to filter sentences. Click any highlighted
                 sentence to inspect its top spam-triggering words.
@@ -1034,6 +1034,21 @@ function SentenceHeatmap({
             bgcolor: "#f7f9fb",
             borderRadius: 2,
             lineHeight: 2.1,
+            maxHeight: 280,
+            overflowY: "auto",
+            "&::-webkit-scrollbar": {
+              width: "6px",
+            },
+            "&::-webkit-scrollbar-track": {
+              background: "transparent",
+            },
+            "&::-webkit-scrollbar-thumb": {
+              background: "rgba(0,0,0,0.1)",
+              borderRadius: "4px",
+            },
+            "&::-webkit-scrollbar-thumb:hover": {
+              background: "rgba(0,0,0,0.15)",
+            },
           }}
         >
           {sentences.map((sentence, index) => {
@@ -1051,21 +1066,32 @@ function SentenceHeatmap({
                 sx={{
                   display: "inline",
                   border: 0,
-                  borderRadius: 1,
-                  mx: 0.25,
-                  px: 0.6,
-                  py: 0.25,
+                  borderRadius: "4px",
+                  mx: 0.1,
+                  px: 0.3,
+                  py: 0.1,
                   cursor: "pointer",
                   font: "inherit",
-                  color: isHighlighted ? "#5f1515" : "text.primary",
-                  bgcolor: isHighlighted
-                    ? `rgba(186, 26, 26, ${opacity * 0.22})`
-                    : "transparent",
-                  outline:
-                    selectedSentence?.text === sentence.text
-                      ? "1px solid #ba1a1a"
-                      : "none",
-                  "&:hover": { bgcolor: "grey.200" },
+                  color: selectedSentence?.text === sentence.text
+                    ? "#ba1a1a"
+                    : (isHighlighted ? "#5f1515" : "text.primary"),
+                  fontWeight: selectedSentence?.text === sentence.text || isHighlighted
+                    ? 500
+                    : "inherit",
+                  bgcolor: selectedSentence?.text === sentence.text
+                    ? "rgba(186, 26, 26, 0.16)"
+                    : (isHighlighted
+                      ? `rgba(186, 26, 26, ${Math.max(0.08, opacity * 0.14)})`
+                      : "transparent"),
+                  borderBottom: selectedSentence?.text === sentence.text
+                    ? "2px solid #ba1a1a"
+                    : (isHighlighted ? "2px solid rgba(186, 26, 26, 0.25)" : "none"),
+                  transition: "background-color 0.15s ease, border-color 0.15s ease",
+                  "&:hover": {
+                    bgcolor: isHighlighted
+                      ? "rgba(186, 26, 26, 0.22)"
+                      : "rgba(0, 0, 0, 0.05)",
+                  },
                 }}
               >
                 {sentence.text}
