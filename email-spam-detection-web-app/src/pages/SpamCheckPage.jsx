@@ -603,7 +603,18 @@ function OverallAssessment({ prediction }) {
 
 function FeatureRadarChart({ features, averages }) {
   const svgRef = useRef(null);
+  const containerRef = useRef(null);
   const hasEmailFeatures = Boolean(features && Object.keys(features).length);
+  const [hiddenSeries, setHiddenSeries] = useState(new Set());
+
+  const toggleSeries = (key) => {
+    setHiddenSeries(prev => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  };
 
   const series = useMemo(
     () => [
@@ -646,7 +657,7 @@ function FeatureRadarChart({ features, averages }) {
   );
 
   useEffect(() => {
-    if (!hasEmailFeatures || !svgRef.current) {
+    if (!hasEmailFeatures || !svgRef.current || !containerRef.current) {
       return;
     }
 
@@ -674,6 +685,24 @@ function FeatureRadarChart({ features, averages }) {
     svg.selectAll("*").remove();
     svg.attr("viewBox", `0 0 ${width} ${height}`);
 
+    let tooltip = d3.select(containerRef.current).select(".radar-tooltip");
+    if (tooltip.empty()) {
+      tooltip = d3.select(containerRef.current)
+        .append("div")
+        .attr("class", "radar-tooltip")
+        .style("position", "absolute")
+        .style("background", "rgba(15, 23, 42, 0.95)")
+        .style("color", "#fff")
+        .style("padding", "8px 12px")
+        .style("border-radius", "6px")
+        .style("font-size", "12px")
+        .style("font-family", '"Manrope", sans-serif')
+        .style("pointer-events", "none")
+        .style("opacity", 0)
+        .style("z-index", 10)
+        .style("box-shadow", "0 4px 6px -1px rgb(0 0 0 / 0.1)");
+    }
+
     const line = d3.line().curve(d3.curveLinearClosed);
 
     svg
@@ -685,7 +714,7 @@ function FeatureRadarChart({ features, averages }) {
         line(FEATURE_AXES.map((_, index) => pointFor(index, level))),
       )
       .attr("fill", "none")
-      .attr("stroke", "#d8dadc")
+      .attr("stroke", "#e2e8f0")
       .attr("stroke-width", 1);
 
     const axes = svg
@@ -696,63 +725,109 @@ function FeatureRadarChart({ features, averages }) {
 
     axes
       .append("line")
+      .attr("class", "radar-axis-line")
       .attr("x1", center)
       .attr("y1", center)
       .attr("x2", (_, index) => pointFor(index, 1)[0])
       .attr("y2", (_, index) => pointFor(index, 1)[1])
-      .attr("stroke", "#d8dadc");
+      .attr("stroke", "#e2e8f0");
 
     axes
       .append("text")
+      .attr("class", "radar-axis-label")
       .attr("x", (_, index) => pointFor(index, 1.17)[0])
       .attr("y", (_, index) => pointFor(index, 1.17)[1])
       .attr("text-anchor", "middle")
       .attr("dominant-baseline", "middle")
       .attr("font-size", 10)
-      .attr("fill", "#45464d")
-      .text((axis) => axis.label);
+      .attr("font-weight", 600)
+      .attr("fill", "#64748b")
+      .style("cursor", "pointer")
+      .text((axis) => axis.label)
+      .on("mouseover", function(event, axisData) {
+        d3.selectAll(".radar-axis-line")
+          .attr("stroke", d => d.key === axisData.key ? "#94a3b8" : "#f1f5f9")
+          .attr("stroke-width", d => d.key === axisData.key ? 2 : 1);
+        d3.selectAll(".radar-axis-label")
+          .attr("fill", d => d.key === axisData.key ? "#0f172a" : "#cbd5e1");
+      })
+      .on("mouseout", function() {
+        d3.selectAll(".radar-axis-line")
+          .attr("stroke", "#e2e8f0")
+          .attr("stroke-width", 1);
+        d3.selectAll(".radar-axis-label")
+          .attr("fill", "#64748b");
+      });
 
-    const visibleSeries = series.filter((item) => item.values);
-    const polygons = svg
+    const visibleSeries = series.filter((item) => item.values && !hiddenSeries.has(item.key));
+    
+    svg
       .selectAll(".radar-series")
-      .data(visibleSeries)
-      .join("path")
-      .attr("class", "radar-series")
-      .attr("d", (item) => line(pointsFor(item.values)))
-      .attr("fill", (item) => item.color)
-      .attr("fill-opacity", 0)
-      .attr("stroke", (item) => item.color)
-      .attr("stroke-width", 2);
-
-    polygons.transition().duration(700).attr("fill-opacity", 0.08);
+      .data(visibleSeries, d => d.key)
+      .join(
+        enter => enter.append("path")
+          .attr("class", "radar-series")
+          .attr("d", (item) => line(pointsFor(item.values)))
+          .attr("fill", (item) => item.color)
+          .attr("fill-opacity", 0)
+          .attr("stroke", (item) => item.color)
+          .attr("stroke-width", 2)
+          .style("pointer-events", "none")
+          .call(enter => enter.transition().duration(700).attr("fill-opacity", 0.08)),
+        update => update
+          .call(update => update.transition().duration(700)
+            .attr("d", (item) => line(pointsFor(item.values)))
+          ),
+        exit => exit.transition().duration(300).attr("fill-opacity", 0).remove()
+      );
 
     visibleSeries.forEach((item) => {
       svg
         .selectAll(`.radar-point-${item.key}`)
         .data(FEATURE_AXES)
-        .join("circle")
-        .attr("class", `radar-point-${item.key}`)
-        .attr("cx", (axis, index) => {
-          const normalized = getNormalized(axis.key, item.values?.[axis.key]);
-          return pointFor(index, normalized)[0];
-        })
-        .attr("cy", (axis, index) => {
-          const normalized = getNormalized(axis.key, item.values?.[axis.key]);
-          return pointFor(index, normalized)[1];
-        })
-        .attr("r", 3)
-        .attr("fill", item.color)
-        .append("title")
-        .text((axis) => {
+        .join(
+          enter => enter.append("circle")
+            .attr("class", `radar-point-${item.key}`)
+            .attr("cx", (axis, index) => pointFor(index, getNormalized(axis.key, item.values?.[axis.key]))[0])
+            .attr("cy", (axis, index) => pointFor(index, getNormalized(axis.key, item.values?.[axis.key]))[1])
+            .attr("r", 0)
+            .attr("fill", item.color)
+            .style("cursor", "crosshair")
+            .call(enter => enter.transition().duration(700).attr("r", 4)),
+          update => update
+            .call(update => update.transition().duration(700)
+              .attr("cx", (axis, index) => pointFor(index, getNormalized(axis.key, item.values?.[axis.key]))[0])
+              .attr("cy", (axis, index) => pointFor(index, getNormalized(axis.key, item.values?.[axis.key]))[1])
+            ),
+          exit => exit.remove()
+        )
+        .on("mouseover", function(event, axis) {
+          d3.select(this).transition().duration(150).attr("r", 7).attr("stroke", "#fff").attr("stroke-width", 2);
           const rawVal = item.values?.[axis.key] ?? 0;
-          const displayVal =
-            axis.key === "capital_ratio"
-              ? `${Math.round(rawVal * 100)}%`
-              : rawVal;
-          return `${item.label} ${axis.label}: ${displayVal}`;
+          let displayVal = rawVal;
+          if (axis.key === "capital_ratio" || axis.key === "emoji_count") {
+             displayVal = Number(rawVal).toFixed(3);
+          } else if (Number.isFinite(rawVal) && !Number.isInteger(rawVal)) {
+             displayVal = Number(rawVal).toFixed(2);
+          }
+          tooltip.html(`
+            <div style="font-weight: 800; margin-bottom: 4px; color: ${item.color}">${item.label}</div>
+            <div>${axis.label}: <strong style="font-size: 13px;">${displayVal}</strong></div>
+          `)
+            .style("opacity", 1);
+        })
+        .on("mousemove", function(event) {
+           const [x, y] = d3.pointer(event, containerRef.current);
+           tooltip
+             .style("left", `${x + 15}px`)
+             .style("top", `${y + 15}px`);
+        })
+        .on("mouseout", function() {
+           d3.select(this).transition().duration(150).attr("r", 4).attr("stroke", "none");
+           tooltip.style("opacity", 0);
         });
     });
-  }, [hasEmailFeatures, getNormalized, series]);
+  }, [hasEmailFeatures, getNormalized, series, hiddenSeries]);
 
   return (
     <Card sx={cardSx} id="export-radar-chart">
@@ -785,13 +860,16 @@ function FeatureRadarChart({ features, averages }) {
             alignItems="center"
             sx={{ mt: 3, width: "100%" }}
           >
-            <Box sx={{ width: "100%", display: "flex", justifyContent: "center" }}>
+            <Box 
+              ref={containerRef}
+              sx={{ width: "100%", display: "flex", justifyContent: "center", position: "relative" }}
+            >
               <Box
                 component="svg"
                 ref={svgRef}
                 role="img"
                 aria-label="Feature radar chart"
-                sx={{ width: 260, height: 260, maxWidth: "100%", display: "block" }}
+                sx={{ width: 260, height: 260, maxWidth: "100%", display: "block", overflow: "visible" }}
               />
             </Box>
             <Stack 
@@ -800,24 +878,42 @@ function FeatureRadarChart({ features, averages }) {
               justifyContent="center" 
               flexWrap="wrap"
             >
-              {series.map((item) => (
-                <Stack
-                  key={item.key}
-                  direction="row"
-                  spacing={1}
-                  alignItems="center"
-                >
-                  <Box
-                    sx={{
-                      width: 12,
-                      height: 12,
-                      borderRadius: 0.5,
-                      bgcolor: item.color,
+              {series.map((item) => {
+                const isHidden = hiddenSeries.has(item.key);
+                return (
+                  <Stack
+                    key={item.key}
+                    direction="row"
+                    spacing={1}
+                    alignItems="center"
+                    onClick={() => toggleSeries(item.key)}
+                    sx={{ 
+                      cursor: "pointer", 
+                      opacity: isHidden ? 0.4 : 1,
+                      transition: "opacity 0.2s",
+                      "&:hover": { opacity: isHidden ? 0.6 : 0.8 }
                     }}
-                  />
-                  <Typography variant="body2">{item.label}</Typography>
-                </Stack>
-              ))}
+                  >
+                    <Box
+                      sx={{
+                        width: 12,
+                        height: 12,
+                        borderRadius: 0.5,
+                        bgcolor: item.color,
+                      }}
+                    />
+                    <Typography 
+                      variant="body2" 
+                      sx={{ 
+                        fontWeight: 600,
+                        textDecoration: isHidden ? "line-through" : "none"
+                      }}
+                    >
+                      {item.label}
+                    </Typography>
+                  </Stack>
+                );
+              })}
             </Stack>
           </Stack>
         )}
