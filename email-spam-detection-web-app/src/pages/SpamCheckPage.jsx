@@ -1165,9 +1165,8 @@ function SentenceTokenCard({ sentence, selectedModel }) {
         ) : tokenData?.tokens?.length ? (
           <Box
             sx={{
-              flex: 1,
-              minHeight: 0,
               overflowY: "auto",
+              maxHeight: 280,
               pr: 0.5,
               "&::-webkit-scrollbar": {
                 width: "6px",
