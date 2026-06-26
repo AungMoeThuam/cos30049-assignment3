@@ -1197,11 +1197,9 @@ function SentenceTokenCard({ sentence, selectedModel }) {
                 maxHeight: 310,
                 overflowY: "auto",
                 display: "flex",
-                flexWrap: "wrap",
-                gap: "10px 14px",
                 justifyContent: "center",
                 alignItems: "center",
-                p: 2.5,
+                p: 1.5,
                 bgcolor: "#f8fafc",
                 borderRadius: 2,
                 border: "1px dashed",
@@ -1222,48 +1220,154 @@ function SentenceTokenCard({ sentence, selectedModel }) {
               }}
             >
               {(() => {
+                const width = 310;
+                const height = 240;
+
                 const keywords = tokenData.tokens
                   .map((t) => ({
                     word: t.token,
                     score: percent(t.models?.[selectedModel]?.spam_probability),
                   }))
                   .sort((a, b) => b.score - a.score)
-                  .slice(0, 15);
+                  .slice(0, 30); // Use up to 30 tokens for a dense, rich cloud!
 
-                const getWordColor = (score) => {
-                  if (score >= 50) {
-                    const t = (score - 50) / 50;
-                    return d3.interpolateReds(0.5 + t * 0.4);
-                  }
-                  const t = score / 50;
-                  return d3.interpolateGreys(0.45 + t * 0.2);
+                const placed = [];
+                const intersects = (b1, b2) => {
+                  return (
+                    b1.x < b2.x + b2.width &&
+                    b1.x + b1.width > b2.x &&
+                    b1.y < b2.y + b2.height &&
+                    b1.y + b1.height > b2.y
+                  );
                 };
 
-                return keywords.map((kw) => (
+                const getWordColor = (word, score) => {
+                  if (score >= 50) {
+                    // Curated palette of dark reds, maroons, golds, and dark browns
+                    const colors = ["#7f1d1d", "#9a3412", "#78350f", "#851e1e", "#a16207", "#5c2e16"];
+                    let hash = 0;
+                    for (let i = 0; i < word.length; i++) {
+                      hash = word.charCodeAt(i) + ((hash << 5) - hash);
+                    }
+                    const idx = Math.abs(hash) % colors.length;
+                    return colors[idx];
+                  }
+                  return "#475569"; // slate grey for normal keywords
+                };
+
+                keywords.forEach((kw) => {
+                  const text = kw.word.toUpperCase();
+                  // Font size range: 11px for low score, up to 32px for high score
+                  const fontSize = Math.round(11 + (kw.score / 100) * 21);
+                  // Narrow bold font horizontal character scaling: ~0.55
+                  const w = text.length * fontSize * 0.55;
+                  const h = fontSize;
+
+                  let x = width / 2;
+                  let y = height / 2;
+                  let theta = Math.random() * Math.PI * 2;
+                  let radius = 0;
+                  let found = false;
+                  let attempts = 0;
+                  const maxAttempts = 800; // robust spiral search limits
+
+                  while (!found && attempts < maxAttempts) {
+                    attempts++;
+                    const box = {
+                      x: x - w / 2,
+                      y: y - h / 2,
+                      width: w,
+                      height: h,
+                    };
+
+                    let overlap = false;
+                    const padding = 1.5; // Very tight word-cloud packing
+                    const paddedBox = {
+                      x: box.x - padding,
+                      y: box.y - padding,
+                      width: box.width + padding * 2,
+                      height: box.height + padding * 2,
+                    };
+
+                    for (const other of placed) {
+                      if (intersects(paddedBox, other)) {
+                        overlap = true;
+                        break;
+                      }
+                    }
+
+                    // Constrain within the canvas container
+                    if (
+                      box.x < 4 ||
+                      box.x + box.width > width - 4 ||
+                      box.y < 4 ||
+                      box.y + box.height > height - 4
+                    ) {
+                      overlap = true;
+                    }
+
+                    if (!overlap) {
+                      placed.push({ ...box, word: text, fontSize, score: kw.score });
+                      found = true;
+                    } else {
+                      // Walk along Archimedean spiral
+                      radius += 0.4;
+                      theta += 0.12;
+                      x = width / 2 + Math.cos(theta) * radius;
+                      y = height / 2 + Math.sin(theta) * radius;
+                    }
+                  }
+
+                  if (!found) {
+                    // Fallback placement (randomly packed within boundaries)
+                    placed.push({
+                      x: Math.random() * (width - w - 8) + 4,
+                      y: Math.random() * (height - h - 8) + 4,
+                      width: w,
+                      height: h,
+                      word: text,
+                      fontSize,
+                      score: kw.score,
+                    });
+                  }
+                });
+
+                return (
                   <Box
-                    key={kw.word}
-                    title={`${kw.score}% spam probability`}
-                    sx={{
-                      cursor: "default",
-                      transition: "transform 0.15s ease, filter 0.15s ease",
-                      "&:hover": {
-                        transform: "scale(1.15)",
-                        filter: "brightness(0.9)",
-                      },
-                    }}
+                    component="svg"
+                    viewBox={`0 0 ${width} ${height}`}
+                    sx={{ width: "100%", height: "100%", overflow: "visible" }}
                   >
-                    <Typography
-                      sx={{
-                        fontSize: 13 + (kw.score / 100) * 15,
-                        fontWeight: kw.score >= 50 ? 800 : 600,
-                        color: getWordColor(kw.score),
-                        lineHeight: 1.1,
-                      }}
-                    >
-                      {kw.word}
-                    </Typography>
+                    {placed.map((item, idx) => (
+                      <text
+                        key={`${item.word}-${idx}`}
+                        x={item.x + item.width / 2}
+                        y={item.y + item.height - (item.fontSize * 0.1)} // baseline adjustment
+                        textAnchor="middle"
+                        title={`${item.score}% spam probability`}
+                        style={{
+                          fontSize: `${item.fontSize}px`,
+                          fontWeight: 900,
+                          fill: getWordColor(item.word, item.score),
+                          fontFamily: '"Impact", "Anton", "Arial Black", sans-serif',
+                          cursor: "default",
+                          transition: "transform 0.15s ease, fill-opacity 0.15s ease",
+                          transformOrigin: `${item.x + item.width / 2}px ${item.y + item.height / 2}px`,
+                        }}
+                        onMouseOver={(e) => {
+                          e.target.style.transform = "scale(1.15)";
+                          e.target.style.fillOpacity = "0.8";
+                        }}
+                        onMouseOut={(e) => {
+                          e.target.style.transform = "scale(1)";
+                          e.target.style.fillOpacity = "1";
+                        }}
+                      >
+                        {item.word}
+                      </text>
+                    ))}
                   </Box>
-                ));
+                );
               })()}
             </Box>
           )
