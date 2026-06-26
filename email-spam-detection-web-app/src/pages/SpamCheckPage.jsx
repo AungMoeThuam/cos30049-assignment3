@@ -872,6 +872,7 @@ function FeatureRadarChart({ features, averages }) {
                     sx={{
                       width: 12,
                       height: 12,
+                      flexShrink: 0,
                       borderRadius: 0.5,
                       bgcolor: item.color,
                     }}
@@ -880,6 +881,7 @@ function FeatureRadarChart({ features, averages }) {
                     variant="body2" 
                     sx={{ 
                       fontWeight: 600,
+                      lineHeight: 1,
                       textDecoration: isHidden ? "line-through" : "none",
                     }}
                   >
@@ -1775,11 +1777,12 @@ function GroupedBarChart({ summaries, models }) {
               sx={{
                 width: 12,
                 height: 12,
+                flexShrink: 0,
                 bgcolor: "error.main",
                 borderRadius: 0.5,
               }}
             />
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1 }}>
               Spam
             </Typography>
           </Stack>
@@ -1788,11 +1791,12 @@ function GroupedBarChart({ summaries, models }) {
               sx={{
                 width: 12,
                 height: 12,
+                flexShrink: 0,
                 bgcolor: "success.main",
                 borderRadius: 0.5,
               }}
             />
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1 }}>
               Ham
             </Typography>
           </Stack>
