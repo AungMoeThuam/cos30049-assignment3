@@ -1,5 +1,5 @@
-import { useEffect } from "react"
-import { Outlet, useNavigate, useLocation } from "react-router"
+import { useEffect } from "react";
+import { Outlet, useNavigate, useLocation } from "react-router";
 import {
   Typography,
   Button,
@@ -7,45 +7,62 @@ import {
   Box,
   Link,
   AppBar,
-  Toolbar
-} from "@mui/material"
+  Toolbar,
+} from "@mui/material";
 
 const navLinks = [
   { label: "Home", path: "/" },
   { label: "About", path: "/#about" },
   { label: "Email Checker", path: "/spam-check" },
-]
+];
 
 export default function RootLayout() {
-  const navigate = useNavigate()
-  const { pathname, hash } = useLocation()
+  const navigate = useNavigate();
+  const { pathname, hash } = useLocation();
 
   useEffect(() => {
-    if (!hash) return
+    if (!hash) return;
 
-    const target = document.querySelector(hash)
+    const target = document.querySelector(hash);
     if (target) {
-      target.scrollIntoView({ behavior: "smooth", block: "start" })
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
     }
-  }, [hash])
+  }, [hash]);
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh", bgcolor: "background.default" }}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        minHeight: "100vh",
+        bgcolor: "background.default",
+      }}
+    >
       {/* Navigation Header */}
-      <AppBar 
-        position="static" 
-        color="transparent" 
+      <AppBar
+        position="static"
+        color="transparent"
         elevation={0}
-        sx={{ 
-          bgcolor: "background.paper", 
-          borderBottom: "1px solid", 
+        sx={{
+          bgcolor: "background.paper",
+          borderBottom: "1px solid",
           borderColor: "divider",
-          px: { xs: 2, md: 8 }
+          px: { xs: 2, md: 8 },
         }}
       >
-        <Toolbar disableGutters sx={{ justifyContent: "space-between", height: 64 }}>
+        <Toolbar
+          disableGutters
+          sx={{ justifyContent: "space-between", height: 64 }}
+        >
           {/* Logo / Brand Name */}
-          <Box sx={{ display: "flex", alignItems: "center", gap: 4 }}>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              gap: 4,
+            }}
+          >
             <Typography
               variant="h6"
               onClick={() => navigate("/")}
@@ -58,56 +75,40 @@ export default function RootLayout() {
             >
               Spam Detector
             </Typography>
-
-            {/* Nav links (hidden on mobile for simplicity, but let's keep them visible) */}
-            <Box sx={{ display: "flex", gap: 3, ml: 4 }}>
-              {navLinks.map(({ label, path }) => {
-                const currentPath = `${pathname}${hash}`
-                const isActive = path.includes("#") ? currentPath === path : pathname === path
-                return (
-                  <Button
-                    key={path}
-                    onClick={() => navigate(path)}
-                    sx={{
-                      color: isActive ? "text.primary" : "text.secondary",
-                      fontWeight: isActive ? 700 : 500,
-                      fontFamily: '"Manrope", sans-serif',
-                      fontSize: "14px",
-                      position: "relative",
-                      borderRadius: 0,
-                      px: 1,
-                      minWidth: "auto",
-                      borderBottom: isActive ? "2px solid" : "none",
-                      borderColor: "text.primary",
-                      "&:hover": {
-                        bgcolor: "transparent",
-                        color: "text.primary",
-                      }
-                    }}
-                  >
-                    {label}
-                  </Button>
-                )
-              })}
-            </Box>
           </Box>
-
-          {/* Action button */}
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => navigate("/spam-check")}
-            sx={{
-              borderRadius: "8px",
-              px: 3,
-              py: 1,
-              fontFamily: '"Manrope", sans-serif',
-              fontSize: "14px",
-              fontWeight: 600,
-            }}
-          >
-            Analyze Email
-          </Button>
+          {/* Nav links (hidden on mobile for simplicity, but let's keep them visible) */}
+          <Box sx={{ display: "flex", gap: 3, ml: 4 }}>
+            {navLinks.map(({ label, path }) => {
+              const currentPath = `${pathname}${hash}`;
+              const isActive = path.includes("#")
+                ? currentPath === path
+                : pathname === path;
+              return (
+                <Button
+                  key={path}
+                  onClick={() => navigate(path)}
+                  sx={{
+                    color: isActive ? "text.primary" : "text.secondary",
+                    fontWeight: isActive ? 700 : 500,
+                    fontFamily: '"Manrope", sans-serif',
+                    fontSize: "14px",
+                    position: "relative",
+                    borderRadius: 0,
+                    px: 1,
+                    minWidth: "auto",
+                    borderBottom: isActive ? "2px solid" : "none",
+                    borderColor: "text.primary",
+                    "&:hover": {
+                      bgcolor: "transparent",
+                      color: "text.primary",
+                    },
+                  }}
+                >
+                  {label}
+                </Button>
+              );
+            })}
+          </Box>
         </Toolbar>
       </AppBar>
 
@@ -117,37 +118,48 @@ export default function RootLayout() {
       </Container>
 
       {/* Modern Minimalist Footer */}
-      <Box 
-        component="footer" 
-        sx={{ 
-          bgcolor: "background.paper", 
-          borderTop: "1px solid", 
+      <Box
+        component="footer"
+        sx={{
+          bgcolor: "background.paper",
+          borderTop: "1px solid",
           borderColor: "divider",
           py: 4,
-          px: { xs: 3, md: 8 }
+          px: { xs: 3, md: 8 },
         }}
       >
-        <Box 
-          sx={{ 
-            display: "flex", 
-            flexDirection: { xs: "column", md: "row" }, 
-            justifyContent: "space-between", 
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: { xs: "column", md: "row" },
+            justifyContent: "space-between",
             alignItems: "center",
             maxWidth: "lg",
             mx: "auto",
-            gap: 2
+            gap: 2,
           }}
         >
-          <Box sx={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 1 }}>
-            <Typography 
-              variant="subtitle2" 
-              sx={{ fontWeight: 700, fontFamily: '"Manrope", sans-serif', mr: 2 }}
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              flexWrap: "wrap",
+              gap: 1,
+            }}
+          >
+            <Typography
+              variant="subtitle2"
+              sx={{
+                fontWeight: 700,
+                fontFamily: '"Manrope", sans-serif',
+                mr: 2,
+              }}
             >
               Spam Detector
             </Typography>
-            <Typography 
-              variant="caption" 
-              color="text.secondary" 
+            <Typography
+              variant="caption"
+              color="text.secondary"
               sx={{ fontFamily: '"Manrope", sans-serif' }}
             >
               © 2026 Spam Detector. Swinburne University Research Project.
@@ -155,16 +167,21 @@ export default function RootLayout() {
           </Box>
 
           <Box sx={{ display: "flex", gap: 3, flexWrap: "wrap" }}>
-            {["Privacy Policy", "Terms of Service", "Documentation", "Support"].map((item) => (
+            {[
+              "Privacy Policy",
+              "Terms of Service",
+              "Documentation",
+              "Support",
+            ].map((item) => (
               <Link
                 key={item}
                 href="#"
                 underline="hover"
                 color="text.secondary"
-                sx={{ 
-                  fontFamily: '"Manrope", sans-serif', 
+                sx={{
+                  fontFamily: '"Manrope", sans-serif',
                   fontSize: "12px",
-                  "&:hover": { color: "text.primary" }
+                  "&:hover": { color: "text.primary" },
                 }}
               >
                 {item}
@@ -174,5 +191,5 @@ export default function RootLayout() {
         </Box>
       </Box>
     </Box>
-  )
+  );
 }
