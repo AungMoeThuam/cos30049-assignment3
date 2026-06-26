@@ -1242,17 +1242,13 @@ function SentenceTokenCard({ sentence, selectedModel }) {
                 };
 
                 const getWordColor = (word, score) => {
-                  if (score >= 50) {
-                    // Curated palette of dark reds, maroons, golds, and dark browns
-                    const colors = ["#7f1d1d", "#9a3412", "#78350f", "#851e1e", "#a16207", "#5c2e16"];
-                    let hash = 0;
-                    for (let i = 0; i < word.length; i++) {
-                      hash = word.charCodeAt(i) + ((hash << 5) - hash);
-                    }
-                    const idx = Math.abs(hash) % colors.length;
-                    return colors[idx];
+                  if (score >= 80) {
+                    return "#b91c1c"; // Obvious Spam Red (Red 700)
                   }
-                  return "#475569"; // slate grey for normal keywords
+                  if (score >= 50) {
+                    return "#ca8a04"; // Obvious Medium Yellow/Gold (Yellow 600)
+                  }
+                  return "#64748b"; // Ham Gray (Slate 500)
                 };
 
                 keywords.forEach((kw) => {
