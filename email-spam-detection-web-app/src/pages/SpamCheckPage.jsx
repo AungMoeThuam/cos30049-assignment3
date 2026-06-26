@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import * as d3 from "d3";
+import html2canvas from "html2canvas";
+import DownloadIcon from "@mui/icons-material/Download";
 import {
   Alert,
   Box,
@@ -10,6 +12,7 @@ import {
   CircularProgress,
   Divider,
   FormControl,
+  IconButton,
   InputLabel,
   LinearProgress,
   MenuItem,
@@ -278,7 +281,7 @@ function ModelComparison({ result, selectedModel, onSelectedModelChange }) {
   }));
 
   return (
-    <Card sx={cardSx}>
+    <Card sx={cardSx} id="export-model-comparison">
       <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
         <Box
           sx={{
@@ -303,21 +306,31 @@ function ModelComparison({ result, selectedModel, onSelectedModelChange }) {
               Compare spam and safe probabilities across all classifiers.
             </Typography>
           </Box>
-          <FormControl size="small" sx={{ minWidth: 220 }}>
-            <InputLabel id="classifier-label">Active Classifier</InputLabel>
-            <Select
-              labelId="classifier-label"
-              value={selectedModel}
-              label="Active Classifier"
-              onChange={(event) => onSelectedModelChange(event.target.value)}
+          <Stack direction="row" spacing={1} alignItems="center">
+            <FormControl size="small" sx={{ minWidth: 220 }}>
+              <InputLabel id="classifier-label">Active Classifier</InputLabel>
+              <Select
+                labelId="classifier-label"
+                value={selectedModel}
+                label="Active Classifier"
+                onChange={(event) => onSelectedModelChange(event.target.value)}
+              >
+                {MODELS.map((model) => (
+                  <MenuItem key={model.key} value={model.key}>
+                    {model.label}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <IconButton
+              className="export-btn-hide"
+              onClick={() => handleExportComponent("export-model-comparison", "model-comparison.png")}
+              size="small"
+              title="Download Image"
             >
-              {MODELS.map((model) => (
-                <MenuItem key={model.key} value={model.key}>
-                  {model.label}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+              <DownloadIcon fontSize="small" />
+            </IconButton>
+          </Stack>
         </Box>
 
         <Box
@@ -741,14 +754,26 @@ function FeatureRadarChart({ features, averages }) {
   }, [hasEmailFeatures, getNormalized, series]);
 
   return (
-    <Card sx={cardSx}>
+    <Card sx={cardSx} id="export-radar-chart">
       <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
-        <Typography variant="caption" color="text.secondary" display="block">
-          Feature Analysis
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Compares extracted content signals against training averages.
-        </Typography>
+        <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
+          <Box>
+            <Typography variant="caption" color="text.secondary" display="block">
+              Feature Analysis
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Compares extracted content signals against training averages.
+            </Typography>
+          </Box>
+          <IconButton 
+            className="export-btn-hide"
+            onClick={() => handleExportComponent("export-radar-chart", "feature-radar-chart.png")} 
+            size="small" 
+            title="Download Image"
+          >
+            <DownloadIcon fontSize="small" />
+          </IconButton>
+        </Stack>
 
         {!hasEmailFeatures ? (
           <EmptyRadarPlot />
@@ -835,30 +860,40 @@ function SentenceHeatmap({
   }
 
   return (
-    <Card sx={cardSx}>
+    <Card sx={cardSx} id="export-sentence-heatmap">
       <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
         <Stack
           direction={{ xs: "column", md: "row" }}
           justifyContent="space-between"
           spacing={2}
         >
-          <Box>
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              display="block"
+          <Stack direction="row" alignItems="flex-start" spacing={1}>
+            <Box>
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                display="block"
+              >
+                Sentence Spam Highlighter
+              </Typography>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ maxWidth: 300 }}
+              >
+                Adjust the threshold to filter sentences. Click any highlighted
+                sentence to inspect its top spam-triggering words.
+              </Typography>
+            </Box>
+            <IconButton
+              className="export-btn-hide"
+              onClick={() => handleExportComponent("export-sentence-heatmap", "sentence-heatmap.png")}
+              size="small"
+              title="Download Image"
             >
-              Sentence Spam Highlighter
-            </Typography>
-            <Typography
-              variant="body2"
-              color="text.secondary"
-              sx={{ maxWidth: 300 }}
-            >
-              Adjust the threshold to filter sentences. Click any highlighted
-              sentence to inspect its top spam-triggering words.
-            </Typography>
-          </Box>
+              <DownloadIcon fontSize="small" />
+            </IconButton>
+          </Stack>
           <Box sx={{ minWidth: { xs: "100%", md: 260 } }}>
             <Stack direction="row" justifyContent="flex-end" spacing={1}>
               <Typography variant="caption" color="text.secondary">
@@ -1111,16 +1146,28 @@ function GroupedBarChart({ summaries, models }) {
   maxCount = maxCount || 1;
 
   return (
-    <Card sx={cardSx}>
+    <Card sx={cardSx} id="export-grouped-bar-chart">
       <CardContent
         sx={{ height: "100%", display: "flex", flexDirection: "column" }}
       >
-        <Typography variant="h6" fontWeight={800} sx={{ mb: 1 }}>
-          Model Predictions (Count)
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
-          Absolute volume of Spam vs Ham flagged by each model.
-        </Typography>
+        <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
+          <Box>
+            <Typography variant="h6" fontWeight={800} sx={{ mb: 1 }}>
+              Model Predictions (Count)
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
+              Absolute volume of Spam vs Ham flagged by each model.
+            </Typography>
+          </Box>
+          <IconButton
+            className="export-btn-hide"
+            onClick={() => handleExportComponent("export-grouped-bar-chart", "model-predictions.png")}
+            size="small"
+            title="Download Image"
+          >
+            <DownloadIcon fontSize="small" />
+          </IconButton>
+        </Stack>
 
         <Box
           sx={{
@@ -1335,6 +1382,26 @@ function CsvBatchDashboard({ result }) {
   );
 }
 
+const handleExportComponent = async (elementId, filename) => {
+  const element = document.getElementById(elementId);
+  if (!element) return;
+  
+  const exportBtns = element.querySelectorAll(".export-btn-hide");
+  exportBtns.forEach(btn => btn.style.display = 'none');
+  
+  try {
+    const canvas = await html2canvas(element, { backgroundColor: "#ffffff", scale: 2 });
+    const link = document.createElement("a");
+    link.download = filename;
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+  } catch (err) {
+    console.error("Export failed:", err);
+  } finally {
+    exportBtns.forEach(btn => btn.style.display = '');
+  }
+};
+
 export default function SpamCheckPage() {
   const [activeTab, setActiveTab] = useState(0);
   const [pastedEmailText, setPastedEmailText] = useState(SAMPLE_EMAIL);
@@ -1438,13 +1505,30 @@ export default function SpamCheckPage() {
 
   return (
     <Box sx={{ pb: 3 }}>
-      <Box sx={{ mb: 2.5 }}>
-        <Typography variant="h4" fontWeight={800}>
-          Email Checker
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Multi-model AI consensus analysis for email safety.
-        </Typography>
+      <Box sx={{ mb: 2.5, display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+        <Box>
+          <Typography variant="h4" fontWeight={800}>
+            Email Checker
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Multi-model AI consensus analysis for email safety.
+          </Typography>
+        </Box>
+        {(((activeTab === 0 || activeTab === 1) && singleAnalysisResult) ||
+          (activeTab === 2 && csvAnalysisResult)) && (
+          <Button
+            variant="outlined"
+            onClick={() => window.print()}
+            sx={{
+              "@media print": { display: "none" },
+              borderRadius: 1,
+              textTransform: "none",
+              fontWeight: 800,
+            }}
+          >
+            Export PDF Report
+          </Button>
+        )}
       </Box>
 
       <Box
@@ -1456,9 +1540,13 @@ export default function SpamCheckPage() {
           },
           gap: 2,
           mb: 2,
+          "@media print": {
+            display: "block",
+            mb: 0,
+          },
         }}
       >
-        <Card sx={cardSx}>
+        <Card sx={{ ...cardSx, "@media print": { display: "none" } }}>
           <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
             <Tabs
               value={activeTab}
