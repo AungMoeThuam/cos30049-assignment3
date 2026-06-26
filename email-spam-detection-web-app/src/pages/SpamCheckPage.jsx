@@ -1823,7 +1823,6 @@ export default function SpamCheckPage() {
   const [pastedEmailText, setPastedEmailText] = useState(SAMPLE_EMAIL);
   const [selectedSingleFile, setSelectedSingleFile] = useState(null);
   const [selectedCsvFile, setSelectedCsvFile] = useState(null);
-  const [topNWords, setTopNWords] = useState(10);
   const [isLoading, setIsLoading] = useState(false);
   const [singleAnalysisResult, setSingleAnalysisResult] = useState(null);
   const [csvAnalysisResult, setCsvAnalysisResult] = useState(null);
@@ -1882,7 +1881,7 @@ export default function SpamCheckPage() {
         formData.append("file", selectedCsvFile);
 
         const response = await fetch(
-          `${API_BASE_URL}/predict/csv?top_n=${topNWords}`,
+          `${API_BASE_URL}/predict/csv`,
           { method: "POST", body: formData },
         );
         const payload = await response.json();
@@ -2020,32 +2019,14 @@ export default function SpamCheckPage() {
             ) : null}
 
             {activeTab === 2 ? (
-              <Stack spacing={2}>
-                <UploadZone
-                  accept=".csv"
-                  file={selectedCsvFile}
-                  label="Upload a CSV batch"
-                  helperText="CSV must include a body column. A subject column is optional."
-                  onChange={setSelectedCsvFile}
-                  onClear={() => setSelectedCsvFile(null)}
-                />
-                <TextField
-                  label="Top spam keywords"
-                  type="number"
-                  size="small"
-                  value={topNWords}
-                  onChange={(event) =>
-                    setTopNWords(
-                      Math.max(
-                        5,
-                        Math.min(30, Number(event.target.value) || 10),
-                      ),
-                    )
-                  }
-                  slotProps={{ htmlInput: { min: 5, max: 30 } }}
-                  sx={{ maxWidth: 220 }}
-                />
-              </Stack>
+              <UploadZone
+                accept=".csv"
+                file={selectedCsvFile}
+                label="Upload a CSV batch"
+                helperText="CSV must include a body column. A subject column is optional."
+                onChange={setSelectedCsvFile}
+                onClear={() => setSelectedCsvFile(null)}
+              />
             ) : null}
 
             <Stack direction="row" justifyContent="flex-end" sx={{ mt: 2 }}>
