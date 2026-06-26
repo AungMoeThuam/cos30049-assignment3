@@ -192,7 +192,7 @@ def prepare_email_text(subject, body):
     Returns:
         Combined text string ready for prediction
     """
-    eml_text = (str(subject) + " " + str(body)).lower()
+    eml_text = str(subject) + " " + str(body)
     eml_text = re.sub(r"\s+", " ", eml_text).strip()
     return eml_text
 
