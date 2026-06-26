@@ -57,6 +57,9 @@ class SpamWordInfo(BaseModel):
 class ModelBatchSummary(BaseModel):
     spam_count: int = Field(..., ge=0, description="Emails classified as spam")
     ham_count: int = Field(..., ge=0, description="Emails classified as ham")
+    average_confidence: float = Field(
+        0.0, ge=0.0, le=1.0, description="Average confidence score across all emails"
+    )
     confidence_distribution: Dict[str, int] = Field(
         default_factory=lambda: {
             f"{i*10}-{(i+1)*10}%": 0 for i in range(10)

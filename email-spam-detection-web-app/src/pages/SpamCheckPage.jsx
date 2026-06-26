@@ -1910,8 +1910,8 @@ function GroupedBarChart({ summaries, models }) {
                   <Box
                     title={`Spam: ${spam}`}
                     sx={{
-                      width: "40%",
-                      maxWidth: 32,
+                      width: "45%",
+                      maxWidth: 56,
                       height: `${spamHeight}%`,
                       bgcolor: "error.main",
                       borderRadius: "4px 4px 0 0",
@@ -1937,8 +1937,8 @@ function GroupedBarChart({ summaries, models }) {
                   <Box
                     title={`Ham: ${ham}`}
                     sx={{
-                      width: "40%",
-                      maxWidth: 32,
+                      width: "45%",
+                      maxWidth: 56,
                       height: `${hamHeight}%`,
                       bgcolor: "success.main",
                       borderRadius: "4px 4px 0 0",
@@ -2274,6 +2274,15 @@ function CsvBatchDashboard({ result, activeModel }) {
   const summaries = result.model_summaries ?? {};
   const topWords = result.top_spam_words ?? [];
 
+  const modelKeys = Object.keys(summaries);
+  const numModels = Math.max(1, modelKeys.length);
+  const totalSpam = modelKeys.reduce((sum, key) => sum + (summaries[key]?.spam_count || 0), 0);
+  const totalHam = modelKeys.reduce((sum, key) => sum + (summaries[key]?.ham_count || 0), 0);
+  const totalConf = modelKeys.reduce((sum, key) => sum + (summaries[key]?.average_confidence || 0), 0);
+  const avgSpam = Math.round(totalSpam / numModels);
+  const avgHam = Math.round(totalHam / numModels);
+  const avgConf = Math.round((totalConf / numModels) * 100);
+
   return (
     <Stack spacing={2}>
       <Box
@@ -2292,19 +2301,64 @@ function CsvBatchDashboard({ result, activeModel }) {
           }}
         >
           <CardContent sx={{ py: { xs: 4, lg: 0 }, width: "100%" }}>
-            <Typography
-              variant="overline"
-              color="text.secondary"
-              display="block"
-            >
-              CSV Batch Summary
-            </Typography>
-            <Typography variant="h3" fontWeight={900} sx={{ my: 1 }}>
-              {result.total_emails ?? 0}
-            </Typography>
-            <Typography color="text.secondary" variant="body2">
-              Total emails processed
-            </Typography>
+            <Box sx={{ mb: 3 }}>
+              <Typography
+                variant="overline"
+                color="primary.main"
+                fontWeight={800}
+                sx={{ letterSpacing: 1 }}
+                display="block"
+              >
+                CSV BATCH SUMMARY
+              </Typography>
+              <Typography variant="h2" fontWeight={900} sx={{ mt: 1, mb: 0, color: "text.primary" }}>
+                {result.total_emails ?? 0}
+              </Typography>
+              <Typography color="text.secondary" variant="body1" fontWeight={500}>
+                Total emails successfully processed
+              </Typography>
+            </Box>
+
+            <Divider sx={{ mb: 3 }} />
+            
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              <Stack direction="row" spacing={2} sx={{ width: "100%" }}>
+                <Box sx={{ flex: 1, bgcolor: "#fef2f2", p: 2, borderRadius: 2, border: "1px solid", borderColor: "#fecaca" }}>
+                  <Typography variant="h4" fontWeight={900} color="#ef4444">
+                    {avgSpam}
+                  </Typography>
+                  <Typography variant="caption" color="#b91c1c" fontWeight={700} textTransform="uppercase" sx={{ letterSpacing: 0.5 }}>
+                    Avg Spam
+                  </Typography>
+                </Box>
+                <Box sx={{ flex: 1, bgcolor: "#f0fdf4", p: 2, borderRadius: 2, border: "1px solid", borderColor: "#bbf7d0" }}>
+                  <Typography variant="h4" fontWeight={900} color="#22c55e">
+                    {avgHam}
+                  </Typography>
+                  <Typography variant="caption" color="#15803d" fontWeight={700} textTransform="uppercase" sx={{ letterSpacing: 0.5 }}>
+                    Avg Ham
+                  </Typography>
+                </Box>
+              </Stack>
+              
+              <Box sx={{ display: "flex", alignItems: "center", gap: 3, bgcolor: "#eff6ff", p: 2, borderRadius: 2, border: "1px solid", borderColor: "#bfdbfe" }}>
+                <Box sx={{ position: "relative", display: "inline-flex" }}>
+                  <CircularProgress variant="determinate" value={100} size={56} thickness={5} sx={{ color: "#dbeafe", position: "absolute" }} />
+                  <CircularProgress variant="determinate" value={avgConf} size={56} thickness={5} sx={{ color: "#3b82f6" }} />
+                  <Box sx={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <Typography variant="caption" fontWeight={800} color="#1d4ed8">{avgConf}%</Typography>
+                  </Box>
+                </Box>
+                <Box>
+                  <Typography variant="subtitle1" fontWeight={800} color="#1e40af" sx={{ lineHeight: 1.2 }}>
+                    Average Confidence
+                  </Typography>
+                  <Typography variant="caption" color="#3b82f6" fontWeight={600} sx={{ opacity: 0.9 }}>
+                    Across all models
+                  </Typography>
+                </Box>
+              </Box>
+            </Box>
           </CardContent>
         </Card>
 
