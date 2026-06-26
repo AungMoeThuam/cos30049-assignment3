@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState, useCallback } from "react"
 import * as d3 from "d3"
 import {
   Alert,
@@ -544,16 +544,22 @@ function FeatureRadarChart({ features, averages }) {
     [averages, features],
   )
 
-  const maxByFeature = useMemo(() => {
-    return FEATURE_AXES.reduce((acc, axis) => {
-      const max = Math.max(
-        1,
-        ...series.map((item) => Number(item.values?.[axis.key] ?? 0)),
-      )
-      acc[axis.key] = max
-      return acc
-    }, {})
-  }, [series])
+  const getNormalized = useCallback((key, value) => {
+    const DEFAULT_SCALER = {
+      num_urls: { mean: 3.0, std: 2.0 },
+      num_exclamation: { mean: 3.0, std: 4.0 },
+      num_question: { mean: 2.8, std: 3.0 },
+      num_dollar: { mean: 3.3, std: 4.5 },
+      num_all_caps: { mean: 40.0, std: 30.0 },
+      num_numbers: { mean: 400.0, std: 400.0 },
+      word_count: { mean: 400.0, std: 250.0 },
+      capital_ratio: { mean: 0.17, std: 0.06 },
+      emoji_count: { mean: 0.2, std: 0.4 }
+    }
+    const scaler = averages?.scaler?.[key] ?? DEFAULT_SCALER[key] ?? { mean: 0.0, std: 1.0 }
+    const z = (Number(value || 0) - scaler.mean) / (scaler.std || 1.0)
+    return Math.max(0, Math.min(1, (z + 2.5) / 5.0))
+  }, [averages])
 
   useEffect(() => {
     if (!hasEmailFeatures || !svgRef.current) {
@@ -576,8 +582,7 @@ function FeatureRadarChart({ features, averages }) {
     }
     const pointsFor = (values) =>
       FEATURE_AXES.map((axis, index) => {
-        const normalized =
-          Number(values?.[axis.key] ?? 0) / maxByFeature[axis.key]
+        const normalized = getNormalized(axis.key, values?.[axis.key])
         return pointFor(index, normalized)
       })
 
@@ -645,21 +650,23 @@ function FeatureRadarChart({ features, averages }) {
         .join("circle")
         .attr("class", `radar-point-${item.key}`)
         .attr("cx", (axis, index) => {
-          const normalized =
-            Number(item.values?.[axis.key] ?? 0) / maxByFeature[axis.key]
+          const normalized = getNormalized(axis.key, item.values?.[axis.key])
           return pointFor(index, normalized)[0]
         })
         .attr("cy", (axis, index) => {
-          const normalized =
-            Number(item.values?.[axis.key] ?? 0) / maxByFeature[axis.key]
+          const normalized = getNormalized(axis.key, item.values?.[axis.key])
           return pointFor(index, normalized)[1]
         })
         .attr("r", 3)
         .attr("fill", item.color)
         .append("title")
-        .text((axis) => `${item.label} ${axis.label}: ${item.values?.[axis.key] ?? 0}`)
+        .text((axis) => {
+          const rawVal = item.values?.[axis.key] ?? 0
+          const displayVal = axis.key === "capital_ratio" ? `${Math.round(rawVal * 100)}%` : rawVal
+          return `${item.label} ${axis.label}: ${displayVal}`
+        })
     })
-  }, [hasEmailFeatures, maxByFeature, series])
+  }, [hasEmailFeatures, getNormalized, series])
 
   return (
     <Card sx={cardSx}>

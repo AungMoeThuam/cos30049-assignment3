@@ -287,6 +287,17 @@ async def get_feature_averages():
             "word_count": 499.6754,
             "capital_ratio": 0.1739,
             "emoji_count": 0.0573
+        },
+        "scaler": {
+            "num_urls": { "mean": 3.0, "std": 2.0 },
+            "num_exclamation": { "mean": 3.0, "std": 4.0 },
+            "num_question": { "mean": 2.8, "std": 3.0 },
+            "num_dollar": { "mean": 3.3, "std": 4.5 },
+            "num_all_caps": { "mean": 40.0, "std": 30.0 },
+            "num_numbers": { "mean": 400.0, "std": 400.0 },
+            "word_count": { "mean": 400.0, "std": 250.0 },
+            "capital_ratio": { "mean": 0.17, "std": 0.06 },
+            "emoji_count": { "mean": 0.2, "std": 0.4 }
         }
     }
 
