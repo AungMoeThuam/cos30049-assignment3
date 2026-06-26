@@ -375,22 +375,35 @@ function ModelComparison({ result, selectedModel, onSelectedModelChange }) {
                   <Typography
                     variant="caption"
                     color="text.secondary"
-                    textTransform="uppercase"
+                    sx={{
+                      fontSize: "9.5px",
+                      fontWeight: 700,
+                      letterSpacing: "0.05em",
+                      textTransform: "uppercase",
+                      display: "block",
+                      lineHeight: 1.1,
+                    }}
                   >
                     {label}
                   </Typography>
                   <Typography
-                    fontWeight={900}
+                    fontWeight={800}
                     color={
                       prediction?.label
                         ? `${verdictColor(prediction.label)}.main`
                         : "text.secondary"
                     }
+                    sx={{ fontSize: "13px", lineHeight: 1.2 }}
                   >
                     {getConfidence(prediction)}%{" "}
                     <Box
                       component="span"
-                      sx={{ fontSize: 11, textTransform: "uppercase" }}
+                      sx={{
+                        fontSize: "9px",
+                        fontWeight: 700,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.02em",
+                      }}
                     >
                       {prediction?.label ?? "Pending"}
                     </Box>
@@ -440,6 +453,7 @@ function ModelComparison({ result, selectedModel, onSelectedModelChange }) {
                       height: 12,
                       display: "flex",
                       alignItems: "center",
+                      fontSize: "9px",
                     }}
                   >
                     {tick}%
@@ -512,6 +526,8 @@ function ModelComparison({ result, selectedModel, onSelectedModelChange }) {
                           bottom: -24,
                           transform: "translateX(-50%)",
                           whiteSpace: "nowrap",
+                          fontSize: "9.5px",
+                          fontWeight: 500,
                         }}
                       >
                         {label
