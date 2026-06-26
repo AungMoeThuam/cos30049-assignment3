@@ -210,7 +210,7 @@ function ModelComparison({ result, selectedModel, onSelectedModelChange }) {
   }));
 
   return (
-    <Card sx={{ ...cardSx, height: "100%", display: "flex", flexDirection: "column" }} id="export-model-comparison">
+    <Card sx={{ ...cardSx, height: "100%", display: "flex", flexDirection: "column", position: "relative" }} id="export-model-comparison">
       <CardContent sx={{ p: 2, "&:last-child": { pb: 2 }, display: "flex", flexDirection: "column", flexGrow: 1 }}>
         <Box
           sx={{
@@ -235,7 +235,7 @@ function ModelComparison({ result, selectedModel, onSelectedModelChange }) {
               Compare spam and safe probabilities across all classifiers.
             </Typography>
           </Box>
-          <Stack direction="row" spacing={1} alignItems="center">
+          <Stack direction="row" spacing={1} alignItems="center" sx={{ pr: { xs: 0, md: 5 } }}>
             <FormControl size="small" sx={{ minWidth: 220 }}>
               <InputLabel id="classifier-label">Active Classifier</InputLabel>
               <Select
@@ -251,16 +251,35 @@ function ModelComparison({ result, selectedModel, onSelectedModelChange }) {
                 ))}
               </Select>
             </FormControl>
-            <IconButton
-              className="export-btn-hide"
-              onClick={() => handleExportComponent("export-model-comparison", "model-comparison.png")}
-              size="small"
-              title="Download Image"
-            >
-              <DownloadIcon fontSize="small" />
-            </IconButton>
           </Stack>
         </Box>
+        <IconButton
+          className="export-btn-hide"
+          onClick={() => handleExportComponent("export-model-comparison", "model-comparison.png")}
+          size="small"
+          title="Download Image"
+          sx={{
+            position: "absolute",
+            top: 16,
+            right: 16,
+            border: "1px solid",
+            borderColor: "divider",
+            borderRadius: "50%",
+            p: 0.75,
+            transition: "all 0.2s ease-in-out",
+            bgcolor: "background.paper",
+            color: "text.secondary",
+            zIndex: 1,
+            "&:hover": {
+              bgcolor: "action.hover",
+              color: "text.primary",
+              transform: "scale(1.08)",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+            },
+          }}
+        >
+          <DownloadIcon fontSize="small" />
+        </IconButton>
 
         <Box
           sx={{
@@ -771,9 +790,9 @@ function FeatureRadarChart({ features, averages }) {
   }, [hasEmailFeatures, getNormalized, series, hiddenSeries]);
 
   return (
-    <Card sx={{ ...cardSx, height: "100%", display: "flex", flexDirection: "column" }} id="export-radar-chart">
+    <Card sx={{ ...cardSx, height: "100%", display: "flex", flexDirection: "column", position: "relative" }} id="export-radar-chart">
       <CardContent sx={{ p: 2, "&:last-child": { pb: 2 }, display: "flex", flexDirection: "column", flexGrow: 1 }}>
-        <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
+        <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ pr: 5 }}>
           <Box>
             <Typography variant="caption" color="text.secondary" display="block">
               Feature Analysis
@@ -782,15 +801,34 @@ function FeatureRadarChart({ features, averages }) {
               Compares extracted content signals against training averages.
             </Typography>
           </Box>
-          <IconButton 
-            className="export-btn-hide"
-            onClick={() => handleExportComponent("export-radar-chart", "feature-radar-chart.png")} 
-            size="small" 
-            title="Download Image"
-          >
-            <DownloadIcon fontSize="small" />
-          </IconButton>
         </Stack>
+        <IconButton
+          className="export-btn-hide"
+          onClick={() => handleExportComponent("export-radar-chart", "feature-radar-chart.png")}
+          size="small"
+          title="Download Image"
+          sx={{
+            position: "absolute",
+            top: 16,
+            right: 16,
+            border: "1px solid",
+            borderColor: "divider",
+            borderRadius: "50%",
+            p: 0.75,
+            transition: "all 0.2s ease-in-out",
+            bgcolor: "background.paper",
+            color: "text.secondary",
+            zIndex: 1,
+            "&:hover": {
+              bgcolor: "action.hover",
+              color: "text.primary",
+              transform: "scale(1.08)",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+            },
+          }}
+        >
+          <DownloadIcon fontSize="small" />
+        </IconButton>
 
         <Stack
           direction="column"
@@ -897,12 +935,13 @@ function SentenceHeatmap({
   }
 
   return (
-    <Card sx={{ ...cardSx, height: "100%", display: "flex", flexDirection: "column" }} id="export-sentence-heatmap">
+    <Card sx={{ ...cardSx, height: "100%", display: "flex", flexDirection: "column", position: "relative" }} id="export-sentence-heatmap">
       <CardContent sx={{ p: 2, "&:last-child": { pb: 2 }, display: "flex", flexDirection: "column", flexGrow: 1 }}>
         <Stack
           direction={{ xs: "column", md: "row" }}
           justifyContent="space-between"
           spacing={2}
+          sx={{ pr: { xs: 0, md: 5 } }}
         >
           <Stack direction="row" alignItems="flex-start" spacing={1}>
             <Box>
@@ -922,14 +961,6 @@ function SentenceHeatmap({
                 sentence to inspect its top spam-triggering words.
               </Typography>
             </Box>
-            <IconButton
-              className="export-btn-hide"
-              onClick={() => handleExportComponent("export-sentence-heatmap", "sentence-heatmap.png")}
-              size="small"
-              title="Download Image"
-            >
-              <DownloadIcon fontSize="small" />
-            </IconButton>
           </Stack>
           <Box sx={{ minWidth: { xs: "100%", md: 260 } }}>
             <Stack direction="row" justifyContent="flex-end" spacing={1}>
@@ -948,6 +979,33 @@ function SentenceHeatmap({
             />
           </Box>
         </Stack>
+        <IconButton
+          className="export-btn-hide"
+          onClick={() => handleExportComponent("export-sentence-heatmap", "sentence-heatmap.png")}
+          size="small"
+          title="Download Image"
+          sx={{
+            position: "absolute",
+            top: 16,
+            right: 16,
+            border: "1px solid",
+            borderColor: "divider",
+            borderRadius: "50%",
+            p: 0.75,
+            transition: "all 0.2s ease-in-out",
+            bgcolor: "background.paper",
+            color: "text.secondary",
+            zIndex: 1,
+            "&:hover": {
+              bgcolor: "action.hover",
+              color: "text.primary",
+              transform: "scale(1.08)",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+            },
+          }}
+        >
+          <DownloadIcon fontSize="small" />
+        </IconButton>
 
         <Paper
           variant="outlined"
@@ -1554,11 +1612,11 @@ function GroupedBarChart({ summaries, models }) {
   maxCount = maxCount || 1;
 
   return (
-    <Card sx={{ ...cardSx, height: "100%" }} id="export-grouped-bar-chart">
+    <Card sx={{ ...cardSx, height: "100%", position: "relative" }} id="export-grouped-bar-chart">
       <CardContent
         sx={{ height: "100%", display: "flex", flexDirection: "column" }}
       >
-        <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
+        <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ pr: 5 }}>
           <Box>
             <Typography variant="h6" fontWeight={800} sx={{ mb: 1 }}>
               Model Predictions (Count)
@@ -1567,15 +1625,34 @@ function GroupedBarChart({ summaries, models }) {
               Absolute volume of Spam vs Ham flagged by each model.
             </Typography>
           </Box>
-          <IconButton
-            className="export-btn-hide"
-            onClick={() => handleExportComponent("export-grouped-bar-chart", "model-predictions.png")}
-            size="small"
-            title="Download Image"
-          >
-            <DownloadIcon fontSize="small" />
-          </IconButton>
         </Stack>
+        <IconButton
+          className="export-btn-hide"
+          onClick={() => handleExportComponent("export-grouped-bar-chart", "model-predictions.png")}
+          size="small"
+          title="Download Image"
+          sx={{
+            position: "absolute",
+            top: 16,
+            right: 16,
+            border: "1px solid",
+            borderColor: "divider",
+            borderRadius: "50%",
+            p: 0.75,
+            transition: "all 0.2s ease-in-out",
+            bgcolor: "background.paper",
+            color: "text.secondary",
+            zIndex: 1,
+            "&:hover": {
+              bgcolor: "action.hover",
+              color: "text.primary",
+              transform: "scale(1.08)",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+            },
+          }}
+        >
+          <DownloadIcon fontSize="small" />
+        </IconButton>
 
         <Box
           sx={{
