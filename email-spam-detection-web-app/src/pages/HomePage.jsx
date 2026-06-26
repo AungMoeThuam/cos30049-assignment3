@@ -8,6 +8,7 @@ import {
   Chip,
   Box,
   Paper,
+  Link,
 } from "@mui/material"
 
 export default function HomePage() {
@@ -41,7 +42,7 @@ export default function HomePage() {
             mb: 3
           }}
         >
-          AI-Powered Email Spam & Phishing Classifier
+          AI-Powered Email Spam Detector
         </Typography>
         <Typography 
           variant="h6" 
@@ -344,6 +345,22 @@ export default function HomePage() {
             suspicious emails through a FastAPI prediction service and a responsive
             React dashboard. It supports pasted email text, single email files, and
             CSV batch analysis for practical spam and phishing triage.
+            <br /><br />
+            <strong>Training Dataset & Models:</strong> The AI models powering this detector were trained using the Scikit-Learn library. The core models evaluated include Naive Bayes, K-Means Clustering, Logistic Regression, and Linear SVM. 
+            <br />
+            <Box sx={{ mt: 2 }}>
+              <Chip 
+                label="Access our Training Dataset"
+                component="a"
+                href="https://liveswinburneeduau-my.sharepoint.com/:f:/g/personal/105292899_student_swin_edu_au/IgArWPNGyw_GTa-5LNHZSanxAT9Ok7633LuMn-NqIE9SUz0?e=axdxlL"
+                target="_blank"
+                rel="noopener noreferrer"
+                color="primary"
+                variant="outlined"
+                clickable
+                sx={{ fontWeight: "bold", fontFamily: '"Manrope", sans-serif' }}
+              />
+            </Box>
           </Typography>
         </Box>
 
