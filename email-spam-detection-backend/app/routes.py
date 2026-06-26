@@ -248,7 +248,10 @@ async def predict_csv(
 
     top_spam_words = []
     
-    for word, count in word_counts.most_common(max(top_n, 0)):
+    # Calculate top 10% of unique spam words (at least 1 word if any exist)
+    limit = max(1, int(len(word_counts) * 0.1)) if len(word_counts) > 0 else 0
+    
+    for word, count in word_counts.most_common(limit):
         percentage = round((count / total_spam_emails) * 100, 1) if total_spam_emails > 0 else 0.0
         top_spam_words.append(SpamWordInfo(word=word, percentage=percentage, count=count))
 
