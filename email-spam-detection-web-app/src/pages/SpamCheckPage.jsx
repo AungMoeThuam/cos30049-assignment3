@@ -2032,7 +2032,236 @@ function GroupedBarChart({ summaries, models }) {
   );
 }
 
-function CsvBatchDashboard({ result }) {
+function ConfidenceStreamGraph({ summaries }) {
+  const svgRef = useRef(null);
+
+  useEffect(() => {
+    if (!summaries || !svgRef.current) return;
+
+    const bins = [
+      "0-10%",
+      "10-20%",
+      "20-30%",
+      "30-40%",
+      "40-50%",
+      "50-60%",
+      "60-70%",
+      "70-80%",
+      "80-90%",
+      "90-100%",
+    ];
+
+    const data = bins.map((bin) => {
+      const row = { bin };
+      MODELS.forEach((m) => {
+        row[m.key] = summaries[m.key]?.confidence_distribution[bin] || 0;
+      });
+      return row;
+    });
+
+    const keys = MODELS.map((m) => m.key);
+    // Stacked area chart
+    const series = d3.stack().keys(keys)(data);
+
+    const width = 800;
+    const height = 400;
+    const margin = { top: 40, right: 30, bottom: 40, left: 50 };
+
+    const svg = d3.select(svgRef.current);
+    svg.selectAll("*").remove();
+
+    svg
+      .attr("viewBox", [0, 0, width, height])
+      .attr("width", "100%")
+      .attr("height", "100%")
+      .style("display", "block");
+
+    const x = d3
+      .scalePoint()
+      .domain(bins)
+      .range([margin.left, width - margin.right]);
+
+    const y = d3
+      .scaleLinear()
+      .domain([0, d3.max(series, (d) => d3.max(d, (d) => d[1]))])
+      .nice()
+      .range([height - margin.bottom, margin.top]);
+
+    const color = d3
+      .scaleOrdinal()
+      .domain(keys)
+      .range(["#4285F4", "#0F9D58", "#F4B400", "#DB4437"]); // Distinct clean colors
+
+    const area = d3
+      .area()
+      .curve(d3.curveMonotoneX)
+      .x((d) => x(d.data.bin))
+      .y0((d) => y(d[0]))
+      .y1((d) => y(d[1]));
+
+    const tooltip = d3
+      .select(svgRef.current.parentNode)
+      .selectAll(".stream-tooltip")
+      .data([0])
+      .join("div")
+      .attr("class", "stream-tooltip")
+      .style("position", "absolute")
+      .style("visibility", "hidden")
+      .style("background", "rgba(255, 255, 255, 0.95)")
+      .style("border", "1px solid #e2e8f0")
+      .style("border-radius", "6px")
+      .style("padding", "8px 12px")
+      .style("box-shadow", "0 4px 6px -1px rgba(0, 0, 0, 0.1)")
+      .style("pointer-events", "none")
+      .style("font-size", "12px")
+      .style("color", "#0f172a")
+      .style("font-family", '"Inter", "Roboto", sans-serif')
+      .style("z-index", "10");
+
+    // Axes
+    svg
+      .append("g")
+      .attr("transform", `translate(0,${height - margin.bottom})`)
+      .call(d3.axisBottom(x).tickSizeOuter(0))
+      .call((g) => g.select(".domain").attr("stroke", "#cbd5e1"))
+      .selectAll("text")
+      .attr("y", 12)
+      .style("font-family", '"Inter", "Roboto", sans-serif')
+      .style("font-size", "11px")
+      .style("fill", "#64748b");
+
+    svg
+      .append("g")
+      .attr("transform", `translate(${margin.left},0)`)
+      .call(d3.axisLeft(y).ticks(6))
+      .call((g) => g.select(".domain").remove())
+      .call((g) =>
+        g
+          .selectAll(".tick line")
+          .attr("stroke", "#e2e8f0")
+          .attr("stroke-dasharray", "4 4")
+          .attr("x2", width - margin.left - margin.right),
+      )
+      .selectAll("text")
+      .style("font-family", '"Inter", "Roboto", sans-serif')
+      .style("font-size", "11px")
+      .style("fill", "#64748b");
+
+    // Areas
+    svg
+      .append("g")
+      .selectAll("path")
+      .data(series)
+      .join("path")
+      .attr("fill", (d) => color(d.key))
+      .attr("d", area)
+      .attr("opacity", 0.85)
+      .style("transition", "opacity 0.2s ease")
+      .on("mouseover", function (event, d) {
+        d3.select(this).attr("opacity", 1);
+        const modelLabel = MODELS.find((m) => m.key === d.key)?.label;
+        tooltip
+          .style("visibility", "visible")
+          .html(`<strong>${modelLabel}</strong>`);
+      })
+      .on("mousemove", function (event) {
+        const [mx, my] = d3.pointer(event);
+        tooltip.style("top", my - 40 + "px").style("left", mx + 10 + "px");
+      })
+      .on("mouseout", function () {
+        d3.select(this).attr("opacity", 0.85);
+        tooltip.style("visibility", "hidden");
+      });
+
+    // Legend
+    const legend = svg
+      .append("g")
+      .attr("transform", `translate(${margin.left}, 15)`);
+
+    MODELS.forEach((m, i) => {
+      const legendRow = legend
+        .append("g")
+        .attr("transform", `translate(${i * 150}, 0)`);
+      legendRow
+        .append("rect")
+        .attr("width", 12)
+        .attr("height", 12)
+        .attr("fill", color(m.key))
+        .attr("rx", 3);
+      legendRow
+        .append("text")
+        .attr("x", 20)
+        .attr("y", 10)
+        .text(m.label.replace(" Clustering", "").replace(" Regression", " Reg"))
+        .style("font-size", "12px")
+        .style("font-family", '"Inter", "Roboto", sans-serif')
+        .style("fill", "#475569")
+        .style("font-weight", 600);
+    });
+  }, [summaries]);
+
+  return (
+    <Card sx={{ ...cardSx, height: "100%" }} id="export-confidence-stream">
+      <CardContent
+        sx={{ height: "100%", display: "flex", flexDirection: "column" }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "flex-start",
+            mb: 2,
+          }}
+        >
+          <Box>
+            <Typography variant="h6" fontWeight={800} sx={{ mb: 1 }}>
+              Cumulative Confidence Flow (All Models)
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Stacked area chart visualizing the total volume of emails per
+              confidence bucket across all models.
+            </Typography>
+          </Box>
+          <IconButton
+            className="export-btn-hide"
+            onClick={() =>
+              handleExportComponent(
+                "export-confidence-stream",
+                "confidence-streamgraph.png",
+              )
+            }
+            size="small"
+            title="Download Image"
+            sx={{
+              border: "1px solid",
+              borderColor: "divider",
+              borderRadius: "50%",
+              p: 0.75,
+              transition: "all 0.2s ease-in-out",
+              bgcolor: "background.paper",
+              color: "text.secondary",
+              "&:hover": {
+                bgcolor: "action.hover",
+                color: "text.primary",
+                transform: "scale(1.08)",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+              },
+            }}
+          >
+            <DownloadIcon fontSize="small" />
+          </IconButton>
+        </Box>
+        <Box
+          sx={{ width: "100%", position: "relative", flex: 1, minHeight: 300 }}
+        >
+          <svg ref={svgRef} />
+        </Box>
+      </CardContent>
+    </Card>
+  );
+}
+
+function CsvBatchDashboard({ result, activeModel }) {
   if (!result) {
     return (
       <EmptyState
@@ -2080,6 +2309,10 @@ function CsvBatchDashboard({ result }) {
         </Card>
 
         <GroupedBarChart summaries={summaries} models={MODELS} />
+      </Box>
+
+      <Box sx={{ mt: 2 }}>
+        <ConfidenceStreamGraph summaries={summaries} />
       </Box>
 
       <Card sx={cardSx}>
@@ -2384,7 +2617,10 @@ export default function SpamCheckPage() {
       </Box>
 
       {activeTab === 2 || csvAnalysisResult ? (
-        <CsvBatchDashboard result={csvAnalysisResult} />
+        <CsvBatchDashboard
+          result={csvAnalysisResult}
+          activeModel={selectedModel}
+        />
       ) : (
         <Stack spacing={2}>
           <Box
