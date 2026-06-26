@@ -196,7 +196,14 @@ async def predict_csv(
         return CsvPredictionResponse(success=False, data=None, error="CSV file is missing the required 'body' column.")
 
     total_emails = 0
-    model_summaries = {name: {"spam": 0, "ham": 0} for name in MODEL_NAMES}
+    model_summaries = {
+        name: {
+            "spam": 0,
+            "ham": 0,
+            "confidence_distribution": {f"{i*10}-{(i+1)*10}%": 0 for i in range(10)}
+        }
+        for name in MODEL_NAMES
+    }
     spam_texts = []
 
     for row in reader:
@@ -216,6 +223,11 @@ async def predict_csv(
         
         for name, res in results.items():
             if "error" not in res:
+                conf = float(res.get("confidence", 0.0))
+                bucket_idx = min(9, int(conf * 10))
+                bucket_key = f"{bucket_idx * 10}-{(bucket_idx + 1) * 10}%"
+                model_summaries[name]["confidence_distribution"][bucket_key] += 1
+                
                 if str(res["label"]) == "1":
                     model_summaries[name]["spam"] += 1
                     if name == "naive_bayes":
@@ -256,7 +268,11 @@ async def predict_csv(
         top_spam_words.append(SpamWordInfo(word=word, percentage=percentage, count=count))
 
     final_summaries = {
-        name: ModelBatchSummary(spam_count=counts["spam"], ham_count=counts["ham"])
+        name: ModelBatchSummary(
+            spam_count=counts["spam"], 
+            ham_count=counts["ham"], 
+            confidence_distribution=counts["confidence_distribution"]
+        )
         for name, counts in model_summaries.items()
     }
 
