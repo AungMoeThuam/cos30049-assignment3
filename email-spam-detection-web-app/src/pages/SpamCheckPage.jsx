@@ -62,6 +62,10 @@ const cardSx = {
   borderColor: "divider",
   borderRadius: 1.5,
   boxShadow: "none",
+  "@media print": {
+    pageBreakInside: "avoid",
+    breakInside: "avoid",
+  },
 };
 
 function percent(value) {
