@@ -361,8 +361,8 @@ function ModelComparison({ result, selectedModel, onSelectedModelChange }) {
                 key={key}
                 variant="outlined"
                 sx={{
-                  p: 1.5,
-                  minHeight: 116,
+                  p: 1.25,
+                  minHeight: 100,
                   borderRadius: 1.5,
                   display: "flex",
                   flexDirection: "column",
@@ -376,12 +376,10 @@ function ModelComparison({ result, selectedModel, onSelectedModelChange }) {
                     variant="caption"
                     color="text.secondary"
                     sx={{
-                      fontSize: "9.5px",
-                      fontWeight: 700,
-                      letterSpacing: "0.05em",
-                      textTransform: "uppercase",
+                      fontSize: "11px",
+                      fontWeight: 600,
                       display: "block",
-                      lineHeight: 1.1,
+                      lineHeight: 1.2,
                     }}
                   >
                     {label}
@@ -393,16 +391,16 @@ function ModelComparison({ result, selectedModel, onSelectedModelChange }) {
                         ? `${verdictColor(prediction.label)}.main`
                         : "text.secondary"
                     }
-                    sx={{ fontSize: "13px", lineHeight: 1.2 }}
+                    sx={{ fontSize: "15px", lineHeight: 1.2, mt: 0.25 }}
                   >
                     {getConfidence(prediction)}%{" "}
                     <Box
                       component="span"
                       sx={{
-                        fontSize: "9px",
+                        fontSize: "10.5px",
                         fontWeight: 700,
                         textTransform: "uppercase",
-                        letterSpacing: "0.02em",
+                        letterSpacing: "0.03em",
                       }}
                     >
                       {prediction?.label ?? "Pending"}
@@ -453,7 +451,7 @@ function ModelComparison({ result, selectedModel, onSelectedModelChange }) {
                       height: 12,
                       display: "flex",
                       alignItems: "center",
-                      fontSize: "9px",
+                      fontSize: "11px",
                     }}
                   >
                     {tick}%
@@ -526,7 +524,7 @@ function ModelComparison({ result, selectedModel, onSelectedModelChange }) {
                           bottom: -24,
                           transform: "translateX(-50%)",
                           whiteSpace: "nowrap",
-                          fontSize: "9.5px",
+                          fontSize: "11px",
                           fontWeight: 500,
                         }}
                       >
