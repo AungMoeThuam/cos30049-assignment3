@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef, useState, useCallback } from "react"
-import * as d3 from "d3"
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import * as d3 from "d3";
 import {
   Alert,
   Box,
@@ -22,9 +22,9 @@ import {
   Tabs,
   TextField,
   Typography,
-} from "@mui/material"
+} from "@mui/material";
 
-const API_BASE_URL = "http://localhost:8000/api/v1"
+const API_BASE_URL = "http://localhost:8000/api/v1";
 
 const SAMPLE_EMAIL = `Return-Path: <offers@unbelievable-prizes.com>
 Subject: URGENT: Your Account Has Been Selected for a $50,000 Payout!
@@ -32,14 +32,14 @@ Date: Thu, 24 Aug 2024 14:22:10 +0000
 
 Dear Valued Customer,
 
-Congratulations! You have been exclusively selected to receive a one-time cash payout of $50,000 USD. This is not a drill!`
+Congratulations! You have been exclusively selected to receive a one-time cash payout of $50,000 USD. This is not a drill!`;
 
 const MODELS = [
   { key: "naive_bayes", label: "Naive Bayes" },
   { key: "k_means", label: "K-Means Clustering" },
   { key: "logistic_regression", label: "Logistic Regression" },
   { key: "linear_svm", label: "Linear SVM" },
-]
+];
 
 const FEATURE_AXES = [
   { key: "num_urls", label: "URLs" },
@@ -51,39 +51,39 @@ const FEATURE_AXES = [
   { key: "word_count", label: "Words" },
   { key: "capital_ratio", label: "Cap ratio" },
   { key: "emoji_count", label: "Emoji" },
-]
+];
 
 const cardSx = {
   border: "1px solid",
   borderColor: "divider",
   borderRadius: 1.5,
   boxShadow: "none",
-}
+};
 
 function percent(value) {
-  return Math.round(Number(value || 0) * 100)
+  return Math.round(Number(value || 0) * 100);
 }
 
 function readData(payload) {
-  return payload?.data ?? payload
+  return payload?.data ?? payload;
 }
 
 function getModelPrediction(result, modelKey) {
-  return result?.models?.[modelKey] ?? null
+  return result?.models?.[modelKey] ?? null;
 }
 
 function getConfidence(prediction) {
-  return percent(prediction?.confidence)
+  return percent(prediction?.confidence);
 }
 
 function verdictColor(label) {
   if (label === "spam") {
-    return "error"
+    return "error";
   }
   if (label === "ham") {
-    return "success"
+    return "success";
   }
-  return "text.secondary"
+  return "text.secondary";
 }
 
 function EmptyState({ title, description }) {
@@ -110,7 +110,7 @@ function EmptyState({ title, description }) {
         </Typography>
       </Box>
     </Paper>
-  )
+  );
 }
 
 function UploadZone({ accept, file, label, helperText, onChange, onClear }) {
@@ -144,16 +144,21 @@ function UploadZone({ accept, file, label, helperText, onChange, onClear }) {
         {helperText}
       </Typography>
       {file ? (
-        <Stack direction="row" spacing={1} justifyContent="center" sx={{ mt: 2 }}>
+        <Stack
+          direction="row"
+          spacing={1}
+          justifyContent="center"
+          sx={{ mt: 2 }}
+        >
           <Chip label={file.name} onDelete={onClear} variant="outlined" />
         </Stack>
       ) : null}
     </Box>
-  )
+  );
 }
 
 function ConfidenceGauge({ value, label }) {
-  const safeValue = Math.max(0, Math.min(100, value))
+  const safeValue = Math.max(0, Math.min(100, value));
 
   return (
     <Box sx={{ position: "relative", display: "inline-flex" }}>
@@ -185,12 +190,17 @@ function ConfidenceGauge({ value, label }) {
         </Typography>
       </Box>
     </Box>
-  )
+  );
 }
 
 function EmptyRadarPlot() {
   return (
-    <Stack direction={{ xs: "column", sm: "row" }} spacing={3} alignItems="center" sx={{ mt: 2 }}>
+    <Stack
+      direction={{ xs: "column", sm: "row" }}
+      spacing={3}
+      alignItems="center"
+      sx={{ mt: 2 }}
+    >
       <Box
         sx={{
           width: 176,
@@ -250,20 +260,22 @@ function EmptyRadarPlot() {
           ["#2e7d32", "Ham Average"],
         ].map(([color, label]) => (
           <Stack key={label} direction="row" spacing={1} alignItems="center">
-            <Box sx={{ width: 10, height: 10, bgcolor: color, borderRadius: 0.5 }} />
+            <Box
+              sx={{ width: 10, height: 10, bgcolor: color, borderRadius: 0.5 }}
+            />
             <Typography variant="caption">{label}</Typography>
           </Stack>
         ))}
       </Stack>
     </Stack>
-  )
+  );
 }
 
 function ModelComparison({ result, selectedModel, onSelectedModelChange }) {
   const predictions = MODELS.map((model) => ({
     ...model,
     prediction: getModelPrediction(result, model.key),
-  }))
+  }));
 
   return (
     <Card sx={cardSx}>
@@ -280,7 +292,11 @@ function ModelComparison({ result, selectedModel, onSelectedModelChange }) {
           }}
         >
           <Box>
-            <Typography variant="caption" color="text.secondary" display="block">
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              display="block"
+            >
               Model Comparison & Distribution
             </Typography>
             <Typography variant="body2" color="text.secondary">
@@ -307,7 +323,10 @@ function ModelComparison({ result, selectedModel, onSelectedModelChange }) {
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: { xs: "1fr", lg: "minmax(220px, 0.9fr) minmax(0, 2fr)" },
+            gridTemplateColumns: {
+              xs: "1fr",
+              lg: "minmax(220px, 0.9fr) minmax(0, 2fr)",
+            },
             gap: 3,
             mb: 3.5,
           }}
@@ -330,11 +349,16 @@ function ModelComparison({ result, selectedModel, onSelectedModelChange }) {
                   display: "flex",
                   flexDirection: "column",
                   justifyContent: "space-between",
-                  borderColor: selectedModel === key ? "text.primary" : "divider",
+                  borderColor:
+                    selectedModel === key ? "text.primary" : "divider",
                 }}
               >
                 <Box>
-                  <Typography variant="caption" color="text.secondary" textTransform="uppercase">
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    textTransform="uppercase"
+                  >
                     {label}
                   </Typography>
                   <Typography
@@ -346,7 +370,10 @@ function ModelComparison({ result, selectedModel, onSelectedModelChange }) {
                     }
                   >
                     {getConfidence(prediction)}%{" "}
-                    <Box component="span" sx={{ fontSize: 11, textTransform: "uppercase" }}>
+                    <Box
+                      component="span"
+                      sx={{ fontSize: 11, textTransform: "uppercase" }}
+                    >
                       {prediction?.label ?? "Pending"}
                     </Box>
                   </Typography>
@@ -372,7 +399,9 @@ function ModelComparison({ result, selectedModel, onSelectedModelChange }) {
               height: "100%",
             }}
           >
-            <Box sx={{ display: "grid", gridTemplateColumns: "36px 1fr", gap: 1 }}>
+            <Box
+              sx={{ display: "grid", gridTemplateColumns: "36px 1fr", gap: 1 }}
+            >
               <Box
                 sx={{
                   display: "flex",
@@ -388,7 +417,12 @@ function ModelComparison({ result, selectedModel, onSelectedModelChange }) {
                     key={tick}
                     variant="caption"
                     color="text.secondary"
-                    sx={{ lineHeight: 1, height: 12, display: "flex", alignItems: "center" }}
+                    sx={{
+                      lineHeight: 1,
+                      height: 12,
+                      display: "flex",
+                      alignItems: "center",
+                    }}
                   >
                     {tick}%
                   </Typography>
@@ -410,9 +444,9 @@ function ModelComparison({ result, selectedModel, onSelectedModelChange }) {
                 }}
               >
                 {predictions.map(({ key, label, prediction }) => {
-                  const spam = percent(prediction?.spam_probability)
-                  const ham = percent(prediction?.ham_probability)
-                  const isActive = selectedModel === key
+                  const spam = percent(prediction?.spam_probability);
+                  const ham = percent(prediction?.ham_probability);
+                  const isActive = selectedModel === key;
                   return (
                     <Box
                       key={key}
@@ -462,7 +496,9 @@ function ModelComparison({ result, selectedModel, onSelectedModelChange }) {
                           whiteSpace: "nowrap",
                         }}
                       >
-                        {label.replace(" Clustering", "").replace(" Regression", " Reg")}
+                        {label
+                          .replace(" Clustering", "")
+                          .replace(" Regression", " Reg")}
                       </Typography>
                     </Box>
                   );
@@ -473,15 +509,23 @@ function ModelComparison({ result, selectedModel, onSelectedModelChange }) {
         </Box>
       </CardContent>
     </Card>
-  )
+  );
 }
 
 function OverallAssessment({ prediction }) {
   if (!prediction) {
     return (
       <Card sx={cardSx}>
-        <CardContent sx={{ p: 2, textAlign: "center", "&:last-child": { pb: 2 } }}>
-          <Typography variant="caption" color="text.secondary" display="block" textAlign="left" textTransform="uppercase">
+        <CardContent
+          sx={{ p: 2, textAlign: "center", "&:last-child": { pb: 2 } }}
+        >
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            display="block"
+            textAlign="left"
+            textTransform="uppercase"
+          >
             Consensus Verdict
           </Typography>
           <Box sx={{ my: 2 }}>
@@ -493,21 +537,33 @@ function OverallAssessment({ prediction }) {
               label="WAITING FOR ANALYSIS"
               sx={{ fontWeight: 800, fontSize: 11, alignSelf: "center" }}
             />
-            <Typography variant="caption" color="text.secondary" display="block">
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              display="block"
+            >
               Confidence appears after content analysis.
             </Typography>
           </Stack>
         </CardContent>
       </Card>
-    )
+    );
   }
 
-  const isSpam = prediction.label === "spam"
+  const isSpam = prediction.label === "spam";
 
   return (
     <Card sx={cardSx}>
-      <CardContent sx={{ p: 2, textAlign: "center", "&:last-child": { pb: 2 } }}>
-        <Typography variant="caption" color="text.secondary" display="block" textAlign="left" textTransform="uppercase">
+      <CardContent
+        sx={{ p: 2, textAlign: "center", "&:last-child": { pb: 2 } }}
+      >
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          display="block"
+          textAlign="left"
+          textTransform="uppercase"
+        >
           Consensus Verdict
         </Typography>
         <Box sx={{ my: 2 }}>
@@ -528,85 +584,101 @@ function OverallAssessment({ prediction }) {
         </Stack>
       </CardContent>
     </Card>
-  )
+  );
 }
 
 function FeatureRadarChart({ features, averages }) {
-  const svgRef = useRef(null)
-  const hasEmailFeatures = Boolean(features && Object.keys(features).length)
+  const svgRef = useRef(null);
+  const hasEmailFeatures = Boolean(features && Object.keys(features).length);
 
   const series = useMemo(
     () => [
       { key: "email", label: "This Email", color: "#000000", values: features },
-      { key: "spam", label: "Spam Average", color: "#ba1a1a", values: averages?.spam },
-      { key: "ham", label: "Ham Average", color: "#2e7d32", values: averages?.ham },
+      {
+        key: "spam",
+        label: "Spam Average",
+        color: "#ba1a1a",
+        values: averages?.spam,
+      },
+      {
+        key: "ham",
+        label: "Ham Average",
+        color: "#2e7d32",
+        values: averages?.ham,
+      },
     ],
     [averages, features],
-  )
+  );
 
-  const getNormalized = useCallback((key, value) => {
-    const DEFAULT_SCALER = {
-      num_urls: { mean: 3.0, std: 2.0 },
-      num_exclamation: { mean: 3.0, std: 4.0 },
-      num_question: { mean: 2.8, std: 3.0 },
-      num_dollar: { mean: 3.3, std: 4.5 },
-      num_all_caps: { mean: 40.0, std: 30.0 },
-      num_numbers: { mean: 400.0, std: 400.0 },
-      word_count: { mean: 400.0, std: 250.0 },
-      capital_ratio: { mean: 0.17, std: 0.06 },
-      emoji_count: { mean: 0.2, std: 0.4 }
-    }
-    const scaler = averages?.scaler?.[key] ?? DEFAULT_SCALER[key] ?? { mean: 0.0, std: 1.0 }
-    const z = (Number(value || 0) - scaler.mean) / (scaler.std || 1.0)
-    return Math.max(0, Math.min(1, (z + 2.5) / 5.0))
-  }, [averages])
+  const getNormalized = useCallback(
+    (key, value) => {
+      const DEFAULT_SCALER = {
+        num_urls: { mean: 3.0, std: 2.0 },
+        num_exclamation: { mean: 3.0, std: 4.0 },
+        num_question: { mean: 2.8, std: 3.0 },
+        num_dollar: { mean: 3.3, std: 4.5 },
+        num_all_caps: { mean: 40.0, std: 30.0 },
+        num_numbers: { mean: 400.0, std: 400.0 },
+        word_count: { mean: 400.0, std: 250.0 },
+        capital_ratio: { mean: 0.17, std: 0.06 },
+        emoji_count: { mean: 0.2, std: 0.4 },
+      };
+      const scaler = averages?.scaler?.[key] ??
+        DEFAULT_SCALER[key] ?? { mean: 0.0, std: 1.0 };
+      const z = (Number(value || 0) - scaler.mean) / (scaler.std || 1.0);
+      return Math.max(0, Math.min(1, (z + 2.5) / 5.0));
+    },
+    [averages],
+  );
 
   useEffect(() => {
     if (!hasEmailFeatures || !svgRef.current) {
-      return
+      return;
     }
 
-    const width = 260
-    const height = 260
-    const center = width / 2
-    const radius = 92
+    const width = 260;
+    const height = 260;
+    const center = width / 2;
+    const radius = 92;
     const angleFor = (index) =>
-      (Math.PI * 2 * index) / FEATURE_AXES.length - Math.PI / 2
+      (Math.PI * 2 * index) / FEATURE_AXES.length - Math.PI / 2;
     const pointFor = (axisIndex, value) => {
-      const angle = angleFor(axisIndex)
-      const scaledRadius = radius * Math.max(0, Math.min(1, value))
+      const angle = angleFor(axisIndex);
+      const scaledRadius = radius * Math.max(0, Math.min(1, value));
       return [
         center + Math.cos(angle) * scaledRadius,
         center + Math.sin(angle) * scaledRadius,
-      ]
-    }
+      ];
+    };
     const pointsFor = (values) =>
       FEATURE_AXES.map((axis, index) => {
-        const normalized = getNormalized(axis.key, values?.[axis.key])
-        return pointFor(index, normalized)
-      })
+        const normalized = getNormalized(axis.key, values?.[axis.key]);
+        return pointFor(index, normalized);
+      });
 
-    const svg = d3.select(svgRef.current)
-    svg.selectAll("*").remove()
-    svg.attr("viewBox", `0 0 ${width} ${height}`)
+    const svg = d3.select(svgRef.current);
+    svg.selectAll("*").remove();
+    svg.attr("viewBox", `0 0 ${width} ${height}`);
 
-    const line = d3.line().curve(d3.curveLinearClosed)
+    const line = d3.line().curve(d3.curveLinearClosed);
 
     svg
       .selectAll(".radar-grid")
       .data([0.25, 0.5, 0.75, 1])
       .join("path")
       .attr("class", "radar-grid")
-      .attr("d", (level) => line(FEATURE_AXES.map((_, index) => pointFor(index, level))))
+      .attr("d", (level) =>
+        line(FEATURE_AXES.map((_, index) => pointFor(index, level))),
+      )
       .attr("fill", "none")
       .attr("stroke", "#d8dadc")
-      .attr("stroke-width", 1)
+      .attr("stroke-width", 1);
 
     const axes = svg
       .selectAll(".radar-axis")
       .data(FEATURE_AXES)
       .join("g")
-      .attr("class", "radar-axis")
+      .attr("class", "radar-axis");
 
     axes
       .append("line")
@@ -614,7 +686,7 @@ function FeatureRadarChart({ features, averages }) {
       .attr("y1", center)
       .attr("x2", (_, index) => pointFor(index, 1)[0])
       .attr("y2", (_, index) => pointFor(index, 1)[1])
-      .attr("stroke", "#d8dadc")
+      .attr("stroke", "#d8dadc");
 
     axes
       .append("text")
@@ -624,9 +696,9 @@ function FeatureRadarChart({ features, averages }) {
       .attr("dominant-baseline", "middle")
       .attr("font-size", 10)
       .attr("fill", "#45464d")
-      .text((axis) => axis.label)
+      .text((axis) => axis.label);
 
-    const visibleSeries = series.filter((item) => item.values)
+    const visibleSeries = series.filter((item) => item.values);
     const polygons = svg
       .selectAll(".radar-series")
       .data(visibleSeries)
@@ -636,12 +708,9 @@ function FeatureRadarChart({ features, averages }) {
       .attr("fill", (item) => item.color)
       .attr("fill-opacity", 0)
       .attr("stroke", (item) => item.color)
-      .attr("stroke-width", 2)
+      .attr("stroke-width", 2);
 
-    polygons
-      .transition()
-      .duration(700)
-      .attr("fill-opacity", 0.08)
+    polygons.transition().duration(700).attr("fill-opacity", 0.08);
 
     visibleSeries.forEach((item) => {
       svg
@@ -650,23 +719,26 @@ function FeatureRadarChart({ features, averages }) {
         .join("circle")
         .attr("class", `radar-point-${item.key}`)
         .attr("cx", (axis, index) => {
-          const normalized = getNormalized(axis.key, item.values?.[axis.key])
-          return pointFor(index, normalized)[0]
+          const normalized = getNormalized(axis.key, item.values?.[axis.key]);
+          return pointFor(index, normalized)[0];
         })
         .attr("cy", (axis, index) => {
-          const normalized = getNormalized(axis.key, item.values?.[axis.key])
-          return pointFor(index, normalized)[1]
+          const normalized = getNormalized(axis.key, item.values?.[axis.key]);
+          return pointFor(index, normalized)[1];
         })
         .attr("r", 3)
         .attr("fill", item.color)
         .append("title")
         .text((axis) => {
-          const rawVal = item.values?.[axis.key] ?? 0
-          const displayVal = axis.key === "capital_ratio" ? `${Math.round(rawVal * 100)}%` : rawVal
-          return `${item.label} ${axis.label}: ${displayVal}`
-        })
-    })
-  }, [hasEmailFeatures, getNormalized, series])
+          const rawVal = item.values?.[axis.key] ?? 0;
+          const displayVal =
+            axis.key === "capital_ratio"
+              ? `${Math.round(rawVal * 100)}%`
+              : rawVal;
+          return `${item.label} ${axis.label}: ${displayVal}`;
+        });
+    });
+  }, [hasEmailFeatures, getNormalized, series]);
 
   return (
     <Card sx={cardSx}>
@@ -682,21 +754,33 @@ function FeatureRadarChart({ features, averages }) {
           <EmptyRadarPlot />
         ) : (
           <Stack
-            direction={{ xs: "column", md: "row" }}
+            direction="column"
             spacing={3}
             alignItems="center"
-            sx={{ mt: 3 }}
+            sx={{ mt: 3, width: "100%" }}
           >
-            <Box
-              component="svg"
-              ref={svgRef}
-              role="img"
-              aria-label="Feature radar chart"
-              sx={{ width: 260, maxWidth: "100%" }}
-            />
-            <Stack spacing={1}>
+            <Box sx={{ width: "100%", display: "flex", justifyContent: "center" }}>
+              <Box
+                component="svg"
+                ref={svgRef}
+                role="img"
+                aria-label="Feature radar chart"
+                sx={{ width: 260, height: 260, maxWidth: "100%", display: "block" }}
+              />
+            </Box>
+            <Stack 
+              direction="row" 
+              spacing={3} 
+              justifyContent="center" 
+              flexWrap="wrap"
+            >
               {series.map((item) => (
-                <Stack key={item.key} direction="row" spacing={1} alignItems="center">
+                <Stack
+                  key={item.key}
+                  direction="row"
+                  spacing={1}
+                  alignItems="center"
+                >
                   <Box
                     sx={{
                       width: 12,
@@ -713,7 +797,7 @@ function FeatureRadarChart({ features, averages }) {
         )}
       </CardContent>
     </Card>
-  )
+  );
 }
 
 function SentenceHeatmap({
@@ -729,7 +813,7 @@ function SentenceHeatmap({
       <Card sx={cardSx}>
         <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
           <Typography variant="caption" color="text.secondary" display="block">
-            Interactive Heatmap
+            Sentence Spam Highlighter
           </Typography>
           <Paper
             variant="outlined"
@@ -742,12 +826,12 @@ function SentenceHeatmap({
             }}
           >
             <Typography variant="body2" color="text.secondary">
-              Analyze content to highlight sentence-level spam probability.
+              Analyze content to filter sentences by their spam probability.
             </Typography>
           </Paper>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   return (
@@ -759,17 +843,26 @@ function SentenceHeatmap({
           spacing={2}
         >
           <Box>
-            <Typography variant="caption" color="text.secondary" display="block">
-              Interactive Heatmap
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              display="block"
+            >
+              Sentence Spam Highlighter
             </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Click a highlighted sentence to inspect model probabilities.
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ maxWidth: 300 }}
+            >
+              Adjust the threshold to filter sentences. Click any highlighted
+              sentence to inspect its top spam-triggering words.
             </Typography>
           </Box>
           <Box sx={{ minWidth: { xs: "100%", md: 260 } }}>
-            <Stack direction="row" justifyContent="space-between">
+            <Stack direction="row" justifyContent="flex-end" spacing={1}>
               <Typography variant="caption" color="text.secondary">
-                Highlight Threshold
+                Highlight Threshold:
               </Typography>
               <Typography variant="caption" fontWeight={800}>
                 {threshold}%
@@ -795,10 +888,10 @@ function SentenceHeatmap({
           }}
         >
           {sentences.map((sentence, index) => {
-            const prediction = sentence.models?.[selectedModel]
-            const spamProbability = percent(prediction?.spam_probability)
-            const isHighlighted = spamProbability >= threshold
-            const opacity = Math.max(0.12, spamProbability / 100)
+            const prediction = sentence.models?.[selectedModel];
+            const spamProbability = percent(prediction?.spam_probability);
+            const isHighlighted = spamProbability >= threshold;
+            const opacity = Math.max(0.12, spamProbability / 100);
 
             return (
               <Box
@@ -828,27 +921,27 @@ function SentenceHeatmap({
               >
                 {sentence.text}
               </Box>
-            )
+            );
           })}
         </Paper>
       </CardContent>
     </Card>
-  )
+  );
 }
 
 function SentenceTokenCard({ sentence, selectedModel }) {
-  const [tokenData, setTokenData] = useState(null)
-  const [isLoadingTokens, setIsLoadingTokens] = useState(false)
+  const [tokenData, setTokenData] = useState(null);
+  const [isLoadingTokens, setIsLoadingTokens] = useState(false);
 
   useEffect(() => {
     if (!sentence) {
-      setTokenData(null)
-      return
+      setTokenData(null);
+      return;
     }
 
-    let cancelled = false
-    setIsLoadingTokens(true)
-    setTokenData(null)
+    let cancelled = false;
+    setIsLoadingTokens(true);
+    setTokenData(null);
 
     fetch(`${API_BASE_URL}/predict/sentence`, {
       method: "POST",
@@ -858,18 +951,18 @@ function SentenceTokenCard({ sentence, selectedModel }) {
       .then((res) => (res.ok ? res.json() : null))
       .then((payload) => {
         if (!cancelled && payload?.success) {
-          setTokenData(readData(payload))
+          setTokenData(readData(payload));
         }
       })
       .catch(() => {})
       .finally(() => {
-        if (!cancelled) setIsLoadingTokens(false)
-      })
+        if (!cancelled) setIsLoadingTokens(false);
+      });
 
     return () => {
-      cancelled = true
-    }
-  }, [sentence])
+      cancelled = true;
+    };
+  }, [sentence]);
 
   return (
     <Card sx={cardSx}>
@@ -886,7 +979,8 @@ function SentenceTokenCard({ sentence, selectedModel }) {
 
         {!sentence ? (
           <Typography variant="body2" color="text.secondary">
-            Click a sentence in the heatmap to inspect its top spam-triggering tokens.
+            Click a sentence in the heatmap to inspect its top spam-triggering
+            tokens.
           </Typography>
         ) : isLoadingTokens ? (
           <Stack alignItems="center" sx={{ py: 2 }}>
@@ -921,7 +1015,11 @@ function SentenceTokenCard({ sentence, selectedModel }) {
                     label={`${kw.score}%`}
                     color={kw.score >= 50 ? "error" : "default"}
                     variant="outlined"
-                    sx={{ height: 24, fontWeight: 800, bgcolor: kw.score >= 50 ? "#ffdad6" : undefined }}
+                    sx={{
+                      height: 24,
+                      fontWeight: 800,
+                      bgcolor: kw.score >= 50 ? "#ffdad6" : undefined,
+                    }}
                   />
                 </Paper>
               ))}
@@ -933,9 +1031,8 @@ function SentenceTokenCard({ sentence, selectedModel }) {
         )}
       </CardContent>
     </Card>
-  )
+  );
 }
-
 
 function SimpleWordCloud({ words }) {
   if (!words || words.length === 0) {
@@ -943,23 +1040,23 @@ function SimpleWordCloud({ words }) {
       <Typography color="text.secondary">
         No spam keywords were returned for this batch.
       </Typography>
-    )
+    );
   }
 
-  const maxCount = Math.max(...words.map(w => w.count), 1);
-  const minCount = Math.min(...words.map(w => w.count), 0);
+  const maxCount = Math.max(...words.map((w) => w.count), 1);
+  const minCount = Math.min(...words.map((w) => w.count), 0);
 
   const getFontSize = (count) => {
     if (maxCount === minCount) return 24;
     const ratio = (count - minCount) / (maxCount - minCount);
-    return 14 + ratio * 46; 
-  }
+    return 14 + ratio * 46;
+  };
 
   const getColor = (count) => {
     if (maxCount === minCount) return d3.interpolateReds(0.7);
     const ratio = (count - minCount) / (maxCount - minCount);
     return d3.interpolateReds(0.4 + ratio * 0.5);
-  }
+  };
 
   return (
     <Box
@@ -1002,12 +1099,12 @@ function SimpleWordCloud({ words }) {
         </Box>
       ))}
     </Box>
-  )
+  );
 }
 
 function GroupedBarChart({ summaries, models }) {
   let maxCount = 0;
-  models.forEach(m => {
+  models.forEach((m) => {
     const s = summaries[m.key] ?? {};
     maxCount = Math.max(maxCount, s.spam_count ?? 0, s.ham_count ?? 0);
   });
@@ -1015,16 +1112,30 @@ function GroupedBarChart({ summaries, models }) {
 
   return (
     <Card sx={cardSx}>
-      <CardContent sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <CardContent
+        sx={{ height: "100%", display: "flex", flexDirection: "column" }}
+      >
         <Typography variant="h6" fontWeight={800} sx={{ mb: 1 }}>
           Model Predictions (Count)
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
           Absolute volume of Spam vs Ham flagged by each model.
         </Typography>
-        
-        <Box sx={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-around', height: 240, pt: 3, pb: 4, borderBottom: '1px solid', borderColor: 'divider', position: 'relative' }}>
-          {models.map(model => {
+
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "flex-end",
+            justifyContent: "space-around",
+            height: 240,
+            pt: 3,
+            pb: 4,
+            borderBottom: "1px solid",
+            borderColor: "divider",
+            position: "relative",
+          }}
+        >
+          {models.map((model) => {
             const summary = summaries[model.key] ?? {};
             const spam = summary.spam_count ?? 0;
             const ham = summary.ham_count ?? 0;
@@ -1032,83 +1143,136 @@ function GroupedBarChart({ summaries, models }) {
             const hamHeight = (ham / maxCount) * 100;
 
             return (
-              <Box key={model.key} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '20%', position: 'relative', height: '100%' }}>
-                <Box sx={{ display: 'flex', alignItems: 'flex-end', gap: 1, height: '100%', width: '100%', justifyContent: 'center' }}>
-                  <Box 
+              <Box
+                key={model.key}
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  width: "20%",
+                  position: "relative",
+                  height: "100%",
+                }}
+              >
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "flex-end",
+                    gap: 1,
+                    height: "100%",
+                    width: "100%",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Box
                     title={`Spam: ${spam}`}
-                    sx={{ 
-                      width: '40%', 
-                      maxWidth: 32, 
-                      height: `${spamHeight}%`, 
-                      bgcolor: 'error.main', 
-                      borderRadius: '4px 4px 0 0',
-                      transition: 'height 0.5s ease',
-                      position: 'relative',
-                      display: 'flex',
-                      justifyContent: 'center',
-                    }} 
+                    sx={{
+                      width: "40%",
+                      maxWidth: 32,
+                      height: `${spamHeight}%`,
+                      bgcolor: "error.main",
+                      borderRadius: "4px 4px 0 0",
+                      transition: "height 0.5s ease",
+                      position: "relative",
+                      display: "flex",
+                      justifyContent: "center",
+                    }}
                   >
-                    <Typography 
-                      variant="caption" 
-                      sx={{ 
-                        position: 'absolute', 
-                        top: '-22px', 
-                        fontWeight: 800, 
-                        color: 'error.main',
-                        fontSize: '12px'
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        position: "absolute",
+                        top: "-22px",
+                        fontWeight: 800,
+                        color: "error.main",
+                        fontSize: "12px",
                       }}
                     >
                       {spam}
                     </Typography>
                   </Box>
-                  <Box 
+                  <Box
                     title={`Ham: ${ham}`}
-                    sx={{ 
-                      width: '40%', 
-                      maxWidth: 32, 
-                      height: `${hamHeight}%`, 
-                      bgcolor: 'success.main', 
-                      borderRadius: '4px 4px 0 0',
-                      transition: 'height 0.5s ease',
-                      position: 'relative',
-                      display: 'flex',
-                      justifyContent: 'center',
-                    }} 
+                    sx={{
+                      width: "40%",
+                      maxWidth: 32,
+                      height: `${hamHeight}%`,
+                      bgcolor: "success.main",
+                      borderRadius: "4px 4px 0 0",
+                      transition: "height 0.5s ease",
+                      position: "relative",
+                      display: "flex",
+                      justifyContent: "center",
+                    }}
                   >
-                    <Typography 
-                      variant="caption" 
-                      sx={{ 
-                        position: 'absolute', 
-                        top: '-22px', 
-                        fontWeight: 800, 
-                        color: 'success.main',
-                        fontSize: '12px'
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        position: "absolute",
+                        top: "-22px",
+                        fontWeight: 800,
+                        color: "success.main",
+                        fontSize: "12px",
                       }}
                     >
                       {ham}
                     </Typography>
                   </Box>
                 </Box>
-                <Typography variant="caption" color="text.secondary" sx={{ position: 'absolute', bottom: -28, textAlign: 'center', whiteSpace: 'nowrap' }}>
-                  {model.label.replace(" Clustering", "").replace(" Regression", " Reg")}
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{
+                    position: "absolute",
+                    bottom: -28,
+                    textAlign: "center",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {model.label
+                    .replace(" Clustering", "")
+                    .replace(" Regression", " Reg")}
                 </Typography>
               </Box>
-            )
+            );
           })}
         </Box>
-        <Stack direction="row" justifyContent="center" spacing={3} sx={{ mt: 5 }}>
+        <Stack
+          direction="row"
+          justifyContent="center"
+          spacing={3}
+          sx={{ mt: 5 }}
+        >
           <Stack direction="row" alignItems="center" spacing={1}>
-            <Box sx={{ width: 12, height: 12, bgcolor: 'error.main', borderRadius: 0.5 }} />
-            <Typography variant="caption" color="text.secondary">Spam</Typography>
+            <Box
+              sx={{
+                width: 12,
+                height: 12,
+                bgcolor: "error.main",
+                borderRadius: 0.5,
+              }}
+            />
+            <Typography variant="caption" color="text.secondary">
+              Spam
+            </Typography>
           </Stack>
           <Stack direction="row" alignItems="center" spacing={1}>
-            <Box sx={{ width: 12, height: 12, bgcolor: 'success.main', borderRadius: 0.5 }} />
-            <Typography variant="caption" color="text.secondary">Ham</Typography>
+            <Box
+              sx={{
+                width: 12,
+                height: 12,
+                bgcolor: "success.main",
+                borderRadius: 0.5,
+              }}
+            />
+            <Typography variant="caption" color="text.secondary">
+              Ham
+            </Typography>
           </Stack>
         </Stack>
       </CardContent>
     </Card>
-  )
+  );
 }
 
 function CsvBatchDashboard({ result }) {
@@ -1118,11 +1282,11 @@ function CsvBatchDashboard({ result }) {
         title="CSV batch dashboard is empty"
         description="Upload a CSV with a body column, then run analysis to show model summaries and top spam words."
       />
-    )
+    );
   }
 
-  const summaries = result.model_summaries ?? {}
-  const topWords = result.top_spam_words ?? []
+  const summaries = result.model_summaries ?? {};
+  const topWords = result.top_spam_words ?? [];
 
   return (
     <Stack spacing={3}>
@@ -1148,116 +1312,127 @@ function CsvBatchDashboard({ result }) {
             Top Spam Keywords
           </Typography>
           <SimpleWordCloud words={topWords} />
-          
-          <Alert severity="info" sx={{ mt: 3, '& .MuiAlert-message': { width: '100%' } }}>
+
+          <Alert
+            severity="info"
+            sx={{ mt: 3, "& .MuiAlert-message": { width: "100%" } }}
+          >
             <Typography variant="subtitle2" fontWeight={800} sx={{ mb: 0.5 }}>
               Understanding Special Tokens
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              During the content analysis, our AI automatically anonymizes and groups certain patterns. If you see words like <strong>phonenumber</strong>, <strong>url</strong>, <strong>email</strong>, <strong>percentage</strong>, or <strong>number</strong> in the cloud above, these represent categories of data found in the text rather than literal words.
+              During the content analysis, our AI automatically anonymizes and
+              groups certain patterns. If you see words like{" "}
+              <strong>phonenumber</strong>, <strong>url</strong>,{" "}
+              <strong>email</strong>, <strong>percentage</strong>, or{" "}
+              <strong>number</strong> in the cloud above, these represent
+              categories of data found in the text rather than literal words.
             </Typography>
           </Alert>
         </CardContent>
       </Card>
     </Stack>
-  )
+  );
 }
 
 export default function SpamCheckPage() {
-  const [activeTab, setActiveTab] = useState(0)
-  const [pastedEmailText, setPastedEmailText] = useState(SAMPLE_EMAIL)
-  const [selectedSingleFile, setSelectedSingleFile] = useState(null)
-  const [selectedCsvFile, setSelectedCsvFile] = useState(null)
-  const [topNWords, setTopNWords] = useState(10)
-  const [isLoading, setIsLoading] = useState(false)
-  const [singleAnalysisResult, setSingleAnalysisResult] = useState(null)
-  const [csvAnalysisResult, setCsvAnalysisResult] = useState(null)
-  const [selectedModel, setSelectedModel] = useState("naive_bayes")
-  const [highlightThreshold, setHighlightThreshold] = useState(50)
-  const [selectedSentence, setSelectedSentence] = useState(null)
-  const [errorMessage, setErrorMessage] = useState("")
-  const [featureAverages, setFeatureAverages] = useState(null)
+  const [activeTab, setActiveTab] = useState(0);
+  const [pastedEmailText, setPastedEmailText] = useState(SAMPLE_EMAIL);
+  const [selectedSingleFile, setSelectedSingleFile] = useState(null);
+  const [selectedCsvFile, setSelectedCsvFile] = useState(null);
+  const [topNWords, setTopNWords] = useState(10);
+  const [isLoading, setIsLoading] = useState(false);
+  const [singleAnalysisResult, setSingleAnalysisResult] = useState(null);
+  const [csvAnalysisResult, setCsvAnalysisResult] = useState(null);
+  const [selectedModel, setSelectedModel] = useState("naive_bayes");
+  const [highlightThreshold, setHighlightThreshold] = useState(50);
+  const [selectedSentence, setSelectedSentence] = useState(null);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [featureAverages, setFeatureAverages] = useState(null);
 
   useEffect(() => {
-    let isMounted = true
+    let isMounted = true;
 
     fetch(`${API_BASE_URL}/feature-averages`)
       .then((response) => (response.ok ? response.json() : null))
       .then((payload) => {
         if (isMounted && payload) {
-          setFeatureAverages(readData(payload))
+          setFeatureAverages(readData(payload));
         }
       })
       .catch(() => {
         if (isMounted) {
-          setFeatureAverages(null)
+          setFeatureAverages(null);
         }
-      })
+      });
 
     return () => {
-      isMounted = false
-    }
-  }, [])
+      isMounted = false;
+    };
+  }, []);
 
-  const activePrediction = getModelPrediction(singleAnalysisResult, selectedModel)
-  const emailFeatures = singleAnalysisResult?.features ?? null
+  const activePrediction = getModelPrediction(
+    singleAnalysisResult,
+    selectedModel,
+  );
+  const emailFeatures = singleAnalysisResult?.features ?? null;
 
   async function handleAnalyze() {
     try {
-      setIsLoading(true)
-      setErrorMessage("")
-      setSelectedSentence(null)
+      setIsLoading(true);
+      setErrorMessage("");
+      setSelectedSentence(null);
 
       if (activeTab === 2) {
         if (!selectedCsvFile) {
-          throw new Error("Select a CSV file before running batch analysis.")
+          throw new Error("Select a CSV file before running batch analysis.");
         }
 
-        const formData = new FormData()
-        formData.append("file", selectedCsvFile)
+        const formData = new FormData();
+        formData.append("file", selectedCsvFile);
 
         const response = await fetch(
           `${API_BASE_URL}/predict/csv?top_n=${topNWords}`,
           { method: "POST", body: formData },
-        )
-        const payload = await response.json()
+        );
+        const payload = await response.json();
         if (!response.ok || payload.success === false) {
-          throw new Error(payload.error || "CSV batch prediction failed.")
+          throw new Error(payload.error || "CSV batch prediction failed.");
         }
 
-        setCsvAnalysisResult(readData(payload))
-        setSingleAnalysisResult(null)
-        return
+        setCsvAnalysisResult(readData(payload));
+        setSingleAnalysisResult(null);
+        return;
       }
 
-      const formData = new FormData()
+      const formData = new FormData();
       if (activeTab === 0) {
         if (!pastedEmailText.trim()) {
-          throw new Error("Paste email content before analysis.")
+          throw new Error("Paste email content before analysis.");
         }
-        formData.append("body", pastedEmailText)
+        formData.append("body", pastedEmailText);
       } else {
         if (!selectedSingleFile) {
-          throw new Error("Select an email file before analysis.")
+          throw new Error("Select an email file before analysis.");
         }
-        formData.append("file", selectedSingleFile)
+        formData.append("file", selectedSingleFile);
       }
 
       const response = await fetch(`${API_BASE_URL}/predict`, {
         method: "POST",
         body: formData,
-      })
-      const payload = await response.json()
+      });
+      const payload = await response.json();
       if (!response.ok || payload.success === false) {
-        throw new Error(payload.error || "Email prediction failed.")
+        throw new Error(payload.error || "Email prediction failed.");
       }
 
-      setSingleAnalysisResult(readData(payload))
-      setCsvAnalysisResult(null)
+      setSingleAnalysisResult(readData(payload));
+      setCsvAnalysisResult(null);
     } catch (error) {
-      setErrorMessage(error.message)
+      setErrorMessage(error.message);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
 
@@ -1275,14 +1450,20 @@ export default function SpamCheckPage() {
       <Box
         sx={{
           display: "grid",
-          gridTemplateColumns: { xs: "1fr", lg: "minmax(0, 8fr) minmax(280px, 4fr)" },
+          gridTemplateColumns: {
+            xs: "1fr",
+            lg: "minmax(0, 8fr) minmax(280px, 4fr)",
+          },
           gap: 2,
           mb: 2,
         }}
       >
         <Card sx={cardSx}>
           <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
-            <Tabs value={activeTab} onChange={(_, value) => setActiveTab(value)}>
+            <Tabs
+              value={activeTab}
+              onChange={(_, value) => setActiveTab(value)}
+            >
               <Tab label="Raw Text Paste" />
               <Tab label="File Upload" />
               <Tab label="Batch CSV" />
@@ -1330,7 +1511,10 @@ export default function SpamCheckPage() {
                   value={topNWords}
                   onChange={(event) =>
                     setTopNWords(
-                      Math.max(5, Math.min(30, Number(event.target.value) || 10)),
+                      Math.max(
+                        5,
+                        Math.min(30, Number(event.target.value) || 10),
+                      ),
                     )
                   }
                   slotProps={{ htmlInput: { min: 5, max: 30 } }}
@@ -1378,7 +1562,10 @@ export default function SpamCheckPage() {
           <Box
             sx={{
               display: "grid",
-              gridTemplateColumns: { xs: "1fr", lg: "minmax(0, 8fr) minmax(280px, 4fr)" },
+              gridTemplateColumns: {
+                xs: "1fr",
+                lg: "minmax(0, 8fr) minmax(280px, 4fr)",
+              },
               gap: 2,
             }}
           >
@@ -1414,5 +1601,5 @@ export default function SpamCheckPage() {
         </Alert>
       </Snackbar>
     </Box>
-  )
+  );
 }
