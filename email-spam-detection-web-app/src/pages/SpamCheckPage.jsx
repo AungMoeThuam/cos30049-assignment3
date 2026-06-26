@@ -15,6 +15,7 @@ import {
   IconButton,
   InputLabel,
   LinearProgress,
+  Link,
   MenuItem,
   Paper,
   Select,
@@ -1507,12 +1508,26 @@ export default function SpamCheckPage() {
     <Box sx={{ pb: 3 }}>
       <Box sx={{ mb: 2.5, display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
         <Box>
-          <Typography variant="h4" fontWeight={800}>
-            Email Checker
+          <Typography variant="h4" fontWeight={800} sx={{ mb: 0.5 }}>
+            Email Spam Detector
           </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Multi-model AI consensus analysis for email safety.
+          <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 700, lineHeight: 1.6 }}>
+            Powered by machine learning models trained via Scikit-Learn (Naive Bayes, K-Means Clustering, Logistic Regression, and Linear SVM).
           </Typography>
+          <Box sx={{ mt: 1.5 }}>
+            <Chip 
+              label="View Training Dataset"
+              component="a"
+              href="https://liveswinburneeduau-my.sharepoint.com/:f:/g/personal/105292899_student_swin_edu_au/IgArWPNGyw_GTa-5LNHZSanxAT9Ok7633LuMn-NqIE9SUz0?e=axdxlL"
+              target="_blank"
+              rel="noopener noreferrer"
+              color="primary"
+              variant="outlined"
+              size="small"
+              clickable
+              sx={{ fontWeight: "bold" }}
+            />
+          </Box>
         </Box>
         {(((activeTab === 0 || activeTab === 1) && singleAnalysisResult) ||
           (activeTab === 2 && csvAnalysisResult)) && (
