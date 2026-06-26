@@ -377,33 +377,22 @@ function ModelComparison({ result, selectedModel, onSelectedModelChange }) {
                   <Typography
                     variant="caption"
                     color="text.secondary"
-                    sx={{
-                      fontSize: "11px",
-                      fontWeight: 600,
-                      display: "block",
-                      lineHeight: 1.2,
-                    }}
+                    textTransform="uppercase"
                   >
                     {label}
                   </Typography>
                   <Typography
-                    fontWeight={800}
+                    fontWeight={900}
                     color={
                       prediction?.label
                         ? `${verdictColor(prediction.label)}.main`
                         : "text.secondary"
                     }
-                    sx={{ fontSize: "15px", lineHeight: 1.2, mt: 0.25 }}
                   >
                     {getConfidence(prediction)}%{" "}
                     <Box
                       component="span"
-                      sx={{
-                        fontSize: "10.5px",
-                        fontWeight: 700,
-                        textTransform: "uppercase",
-                        letterSpacing: "0.03em",
-                      }}
+                      sx={{ fontSize: 11, textTransform: "uppercase" }}
                     >
                       {prediction?.label ?? "Pending"}
                     </Box>
