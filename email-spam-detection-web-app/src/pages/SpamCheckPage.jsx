@@ -201,8 +201,6 @@ function ConfidenceGauge({ value, label }) {
   );
 }
 
-
-
 function ModelComparison({ result, selectedModel, onSelectedModelChange }) {
   const predictions = MODELS.map((model) => ({
     ...model,
@@ -210,8 +208,25 @@ function ModelComparison({ result, selectedModel, onSelectedModelChange }) {
   }));
 
   return (
-    <Card sx={{ ...cardSx, height: "100%", display: "flex", flexDirection: "column", position: "relative" }} id="export-model-comparison">
-      <CardContent sx={{ p: 2, "&:last-child": { pb: 2 }, display: "flex", flexDirection: "column", flexGrow: 1 }}>
+    <Card
+      sx={{
+        ...cardSx,
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        position: "relative",
+      }}
+      id="export-model-comparison"
+    >
+      <CardContent
+        sx={{
+          p: 2,
+          "&:last-child": { pb: 2 },
+          display: "flex",
+          flexDirection: "column",
+          flexGrow: 1,
+        }}
+      >
         <Box
           sx={{
             display: "flex",
@@ -253,7 +268,12 @@ function ModelComparison({ result, selectedModel, onSelectedModelChange }) {
             </FormControl>
             <IconButton
               className="export-btn-hide"
-              onClick={() => handleExportComponent("export-model-comparison", "model-comparison.png")}
+              onClick={() =>
+                handleExportComponent(
+                  "export-model-comparison",
+                  "model-comparison.png",
+                )
+              }
               size="small"
               title="Download Image"
               sx={{
@@ -564,7 +584,7 @@ function FeatureRadarChart({ features, averages }) {
   const [hiddenSeries, setHiddenSeries] = useState(new Set());
 
   const toggleSeries = (key) => {
-    setHiddenSeries(prev => {
+    setHiddenSeries((prev) => {
       const next = new Set(prev);
       if (next.has(key)) next.delete(key);
       else next.add(key);
@@ -643,7 +663,8 @@ function FeatureRadarChart({ features, averages }) {
 
     let tooltip = d3.select(containerRef.current).select(".radar-tooltip");
     if (tooltip.empty()) {
-      tooltip = d3.select(containerRef.current)
+      tooltip = d3
+        .select(containerRef.current)
         .append("div")
         .attr("class", "radar-tooltip")
         .style("position", "absolute")
@@ -700,41 +721,53 @@ function FeatureRadarChart({ features, averages }) {
       .attr("fill", "#64748b")
       .style("cursor", "pointer")
       .text((axis) => axis.label)
-      .on("mouseover", function(event, axisData) {
+      .on("mouseover", function (event, axisData) {
         d3.selectAll(".radar-axis-line")
-          .attr("stroke", d => d.key === axisData.key ? "#94a3b8" : "#f1f5f9")
-          .attr("stroke-width", d => d.key === axisData.key ? 2 : 1);
-        d3.selectAll(".radar-axis-label")
-          .attr("fill", d => d.key === axisData.key ? "#0f172a" : "#cbd5e1");
+          .attr("stroke", (d) =>
+            d.key === axisData.key ? "#94a3b8" : "#f1f5f9",
+          )
+          .attr("stroke-width", (d) => (d.key === axisData.key ? 2 : 1));
+        d3.selectAll(".radar-axis-label").attr("fill", (d) =>
+          d.key === axisData.key ? "#0f172a" : "#cbd5e1",
+        );
       })
-      .on("mouseout", function() {
+      .on("mouseout", function () {
         d3.selectAll(".radar-axis-line")
           .attr("stroke", "#e2e8f0")
           .attr("stroke-width", 1);
-        d3.selectAll(".radar-axis-label")
-          .attr("fill", "#64748b");
+        d3.selectAll(".radar-axis-label").attr("fill", "#64748b");
       });
 
-    const visibleSeries = series.filter((item) => item.values && !hiddenSeries.has(item.key));
-    
+    const visibleSeries = series.filter(
+      (item) => item.values && !hiddenSeries.has(item.key),
+    );
+
     svg
       .selectAll(".radar-series")
-      .data(visibleSeries, d => d.key)
+      .data(visibleSeries, (d) => d.key)
       .join(
-        enter => enter.append("path")
-          .attr("class", "radar-series")
-          .attr("d", (item) => line(pointsFor(item.values)))
-          .attr("fill", (item) => item.color)
-          .attr("fill-opacity", 0)
-          .attr("stroke", (item) => item.color)
-          .attr("stroke-width", 2)
-          .style("pointer-events", "none")
-          .call(enter => enter.transition().duration(700).attr("fill-opacity", 0.08)),
-        update => update
-          .call(update => update.transition().duration(700)
+        (enter) =>
+          enter
+            .append("path")
+            .attr("class", "radar-series")
             .attr("d", (item) => line(pointsFor(item.values)))
+            .attr("fill", (item) => item.color)
+            .attr("fill-opacity", 0)
+            .attr("stroke", (item) => item.color)
+            .attr("stroke-width", 2)
+            .style("pointer-events", "none")
+            .call((enter) =>
+              enter.transition().duration(700).attr("fill-opacity", 0.08),
+            ),
+        (update) =>
+          update.call((update) =>
+            update
+              .transition()
+              .duration(700)
+              .attr("d", (item) => line(pointsFor(item.values))),
           ),
-        exit => exit.transition().duration(300).attr("fill-opacity", 0).remove()
+        (exit) =>
+          exit.transition().duration(300).attr("fill-opacity", 0).remove(),
       );
 
     visibleSeries.forEach((item) => {
@@ -742,55 +775,124 @@ function FeatureRadarChart({ features, averages }) {
         .selectAll(`.radar-point-${item.key}`)
         .data(FEATURE_AXES)
         .join(
-          enter => enter.append("circle")
-            .attr("class", `radar-point-${item.key}`)
-            .attr("cx", (axis, index) => pointFor(index, getNormalized(axis.key, item.values?.[axis.key]))[0])
-            .attr("cy", (axis, index) => pointFor(index, getNormalized(axis.key, item.values?.[axis.key]))[1])
-            .attr("r", 0)
-            .attr("fill", item.color)
-            .style("cursor", "crosshair")
-            .call(enter => enter.transition().duration(700).attr("r", 4)),
-          update => update
-            .call(update => update.transition().duration(700)
-              .attr("cx", (axis, index) => pointFor(index, getNormalized(axis.key, item.values?.[axis.key]))[0])
-              .attr("cy", (axis, index) => pointFor(index, getNormalized(axis.key, item.values?.[axis.key]))[1])
+          (enter) =>
+            enter
+              .append("circle")
+              .attr("class", `radar-point-${item.key}`)
+              .attr(
+                "cx",
+                (axis, index) =>
+                  pointFor(
+                    index,
+                    getNormalized(axis.key, item.values?.[axis.key]),
+                  )[0],
+              )
+              .attr(
+                "cy",
+                (axis, index) =>
+                  pointFor(
+                    index,
+                    getNormalized(axis.key, item.values?.[axis.key]),
+                  )[1],
+              )
+              .attr("r", 0)
+              .attr("fill", item.color)
+              .style("cursor", "crosshair")
+              .call((enter) => enter.transition().duration(700).attr("r", 4)),
+          (update) =>
+            update.call((update) =>
+              update
+                .transition()
+                .duration(700)
+                .attr(
+                  "cx",
+                  (axis, index) =>
+                    pointFor(
+                      index,
+                      getNormalized(axis.key, item.values?.[axis.key]),
+                    )[0],
+                )
+                .attr(
+                  "cy",
+                  (axis, index) =>
+                    pointFor(
+                      index,
+                      getNormalized(axis.key, item.values?.[axis.key]),
+                    )[1],
+                ),
             ),
-          exit => exit.remove()
+          (exit) => exit.remove(),
         )
-        .on("mouseover", function(event, axis) {
-          d3.select(this).transition().duration(150).attr("r", 7).attr("stroke", "#fff").attr("stroke-width", 2);
+        .on("mouseover", function (event, axis) {
+          d3.select(this)
+            .transition()
+            .duration(150)
+            .attr("r", 7)
+            .attr("stroke", "#fff")
+            .attr("stroke-width", 2);
           const rawVal = item.values?.[axis.key] ?? 0;
           let displayVal = rawVal;
           if (axis.key === "capital_ratio" || axis.key === "emoji_count") {
-             displayVal = Number(rawVal).toFixed(3);
+            displayVal = Number(rawVal).toFixed(3);
           } else if (Number.isFinite(rawVal) && !Number.isInteger(rawVal)) {
-             displayVal = Number(rawVal).toFixed(2);
+            displayVal = Number(rawVal).toFixed(2);
           }
-          tooltip.html(`
+          tooltip
+            .html(
+              `
             <div style="font-weight: 800; margin-bottom: 4px; color: ${item.color}">${item.label}</div>
             <div>${axis.label}: <strong style="font-size: 13px;">${displayVal}</strong></div>
-          `)
+          `,
+            )
             .style("opacity", 1);
         })
-        .on("mousemove", function(event) {
-           const [x, y] = d3.pointer(event, containerRef.current);
-           tooltip
-             .style("left", `${x + 15}px`)
-             .style("top", `${y + 15}px`);
+        .on("mousemove", function (event) {
+          const [x, y] = d3.pointer(event, containerRef.current);
+          tooltip.style("left", `${x + 15}px`).style("top", `${y + 15}px`);
         })
-        .on("mouseout", function() {
-           d3.select(this).transition().duration(150).attr("r", 4).attr("stroke", "none");
-           tooltip.style("opacity", 0);
+        .on("mouseout", function () {
+          d3.select(this)
+            .transition()
+            .duration(150)
+            .attr("r", 4)
+            .attr("stroke", "none");
+          tooltip.style("opacity", 0);
         });
     });
   }, [hasEmailFeatures, getNormalized, series, hiddenSeries]);
 
   return (
-    <Card sx={{ ...cardSx, height: "100%", display: "flex", flexDirection: "column", position: "relative" }} id="export-radar-chart">
-      <CardContent sx={{ p: 2, "&:last-child": { pb: 2 }, display: "flex", flexDirection: "column", flexGrow: 1 }}>
-        <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ pr: 5 }}>
+    <Card
+      sx={{
+        ...cardSx,
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        position: "relative",
+      }}
+      id="export-radar-chart"
+    >
+      <CardContent
+        sx={{
+          p: 2,
+          "&:last-child": { pb: 2 },
+          display: "flex",
+          flexDirection: "column",
+          flexGrow: 1,
+        }}
+      >
+        <Stack
+          direction="row"
+          justifyContent="space-between"
+          alignItems="flex-start"
+          sx={{ pr: 5 }}
+        >
           <Box>
-            <Typography variant="caption" color="text.secondary" display="block">
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              display="block"
+            >
               Feature Analysis
             </Typography>
             <Typography variant="body2" color="text.secondary">
@@ -800,7 +902,12 @@ function FeatureRadarChart({ features, averages }) {
         </Stack>
         <IconButton
           className="export-btn-hide"
-          onClick={() => handleExportComponent("export-radar-chart", "feature-radar-chart.png")}
+          onClick={() =>
+            handleExportComponent(
+              "export-radar-chart",
+              "feature-radar-chart.png",
+            )
+          }
           size="small"
           title="Download Image"
           sx={{
@@ -832,22 +939,33 @@ function FeatureRadarChart({ features, averages }) {
           alignItems="center"
           sx={{ mt: 3, width: "100%" }}
         >
-          <Box 
+          <Box
             ref={containerRef}
-            sx={{ width: "100%", display: "flex", justifyContent: "center", position: "relative" }}
+            sx={{
+              width: "100%",
+              display: "flex",
+              justifyContent: "center",
+              position: "relative",
+            }}
           >
             <Box
               component="svg"
               ref={svgRef}
               role="img"
               aria-label="Feature radar chart"
-              sx={{ width: 260, height: 260, maxWidth: "100%", display: "block", overflow: "visible" }}
+              sx={{
+                width: 260,
+                height: 260,
+                maxWidth: "100%",
+                display: "block",
+                overflow: "visible",
+              }}
             />
           </Box>
-          <Stack 
-            direction="row" 
-            spacing={3} 
-            justifyContent="center" 
+          <Stack
+            direction="row"
+            spacing={3}
+            justifyContent="center"
             flexWrap="wrap"
           >
             {series.map((item) => {
@@ -856,16 +974,21 @@ function FeatureRadarChart({ features, averages }) {
               const isDisabled = isEmailSeries && !hasEmailFeatures;
               return (
                 <Stack
+                  style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
                   key={item.key}
-                  direction="row"
-                  spacing={1}
-                  alignItems="center"
                   onClick={() => !isDisabled && toggleSeries(item.key)}
-                  sx={{ 
-                    cursor: isDisabled ? "default" : "pointer", 
-                    opacity: isDisabled ? 0.35 : (isHidden ? 0.4 : 1),
+                  sx={{
+                    cursor: isDisabled ? "default" : "pointer",
+                    opacity: isDisabled ? 0.35 : isHidden ? 0.4 : 1,
                     transition: "opacity 0.2s",
-                    "&:hover": { opacity: isDisabled ? 0.35 : (isHidden ? 0.6 : 0.8) }
+                    "&:hover": {
+                      opacity: isDisabled ? 0.35 : isHidden ? 0.6 : 0.8,
+                    },
                   }}
                 >
                   <Box
@@ -877,9 +1000,12 @@ function FeatureRadarChart({ features, averages }) {
                       bgcolor: item.color,
                     }}
                   />
-                  <Typography 
-                    variant="body2" 
-                    sx={{ 
+                  <Typography
+                    style={{
+                      paddingLeft: "0.5rem",
+                    }}
+                    variant="body2"
+                    sx={{
                       fontWeight: 600,
                       lineHeight: 1,
                       textDecoration: isHidden ? "line-through" : "none",
@@ -932,8 +1058,25 @@ function SentenceHeatmap({
   }
 
   return (
-    <Card sx={{ ...cardSx, height: "100%", display: "flex", flexDirection: "column", position: "relative" }} id="export-sentence-heatmap">
-      <CardContent sx={{ p: 2, "&:last-child": { pb: 2 }, display: "flex", flexDirection: "column", flexGrow: 1 }}>
+    <Card
+      sx={{
+        ...cardSx,
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        position: "relative",
+      }}
+      id="export-sentence-heatmap"
+    >
+      <CardContent
+        sx={{
+          p: 2,
+          "&:last-child": { pb: 2 },
+          display: "flex",
+          flexDirection: "column",
+          flexGrow: 1,
+        }}
+      >
         <Stack
           direction={{ xs: "column", md: "row" }}
           justifyContent="space-between"
@@ -978,7 +1121,12 @@ function SentenceHeatmap({
         </Stack>
         <IconButton
           className="export-btn-hide"
-          onClick={() => handleExportComponent("export-sentence-heatmap", "sentence-heatmap.png")}
+          onClick={() =>
+            handleExportComponent(
+              "export-sentence-heatmap",
+              "sentence-heatmap.png",
+            )
+          }
           size="small"
           title="Download Image"
           sx={{
@@ -1052,21 +1200,30 @@ function SentenceHeatmap({
                   py: 0.1,
                   cursor: "pointer",
                   font: "inherit",
-                  color: selectedSentence?.text === sentence.text
-                    ? "#ba1a1a"
-                    : (isHighlighted ? "#5f1515" : "text.primary"),
-                  fontWeight: selectedSentence?.text === sentence.text || isHighlighted
-                    ? 500
-                    : "inherit",
-                  bgcolor: selectedSentence?.text === sentence.text
-                    ? "rgba(186, 26, 26, 0.16)"
-                    : (isHighlighted
-                      ? `rgba(186, 26, 26, ${Math.max(0.08, opacity * 0.14)})`
-                      : "transparent"),
-                  borderBottom: selectedSentence?.text === sentence.text
-                    ? "2px solid #ba1a1a"
-                    : (isHighlighted ? "2px solid rgba(186, 26, 26, 0.25)" : "none"),
-                  transition: "background-color 0.15s ease, border-color 0.15s ease",
+                  color:
+                    selectedSentence?.text === sentence.text
+                      ? "#ba1a1a"
+                      : isHighlighted
+                        ? "#5f1515"
+                        : "text.primary",
+                  fontWeight:
+                    selectedSentence?.text === sentence.text || isHighlighted
+                      ? 500
+                      : "inherit",
+                  bgcolor:
+                    selectedSentence?.text === sentence.text
+                      ? "rgba(186, 26, 26, 0.16)"
+                      : isHighlighted
+                        ? `rgba(186, 26, 26, ${Math.max(0.08, opacity * 0.14)})`
+                        : "transparent",
+                  borderBottom:
+                    selectedSentence?.text === sentence.text
+                      ? "2px solid #ba1a1a"
+                      : isHighlighted
+                        ? "2px solid rgba(186, 26, 26, 0.25)"
+                        : "none",
+                  transition:
+                    "background-color 0.15s ease, border-color 0.15s ease",
                   "&:hover": {
                     bgcolor: isHighlighted
                       ? "rgba(186, 26, 26, 0.22)"
@@ -1121,9 +1278,29 @@ function SentenceTokenCard({ sentence, selectedModel }) {
   }, [sentence]);
 
   return (
-    <Card sx={{ ...cardSx, height: "100%", display: "flex", flexDirection: "column" }}>
-      <CardContent sx={{ p: 2, "&:last-child": { pb: 2 }, display: "flex", flexDirection: "column", flexGrow: 1 }}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1.5 }}>
+    <Card
+      sx={{
+        ...cardSx,
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      <CardContent
+        sx={{
+          p: 2,
+          "&:last-child": { pb: 2 },
+          display: "flex",
+          flexDirection: "column",
+          flexGrow: 1,
+        }}
+      >
+        <Stack
+          direction="row"
+          justifyContent="space-between"
+          alignItems="center"
+          sx={{ mb: 1.5 }}
+        >
           <Typography
             variant="caption"
             color="text.secondary"
@@ -1151,7 +1328,8 @@ function SentenceTokenCard({ sentence, selectedModel }) {
                   sx={{
                     border: 0,
                     bgcolor: viewMode === mode ? "#ffffff" : "transparent",
-                    color: viewMode === mode ? "text.primary" : "text.secondary",
+                    color:
+                      viewMode === mode ? "text.primary" : "text.secondary",
                     borderRadius: "16px",
                     px: 1.5,
                     py: 0.5,
@@ -1159,7 +1337,8 @@ function SentenceTokenCard({ sentence, selectedModel }) {
                     fontWeight: 700,
                     cursor: "pointer",
                     textTransform: "uppercase",
-                    boxShadow: viewMode === mode ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
+                    boxShadow:
+                      viewMode === mode ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
                     transition: "all 0.2s",
                     "&:hover": {
                       color: "text.primary",
@@ -1358,7 +1537,12 @@ function SentenceTokenCard({ sentence, selectedModel }) {
                     }
 
                     if (!overlap) {
-                      placed.push({ ...box, word: text, fontSize, score: kw.score });
+                      placed.push({
+                        ...box,
+                        word: text,
+                        fontSize,
+                        score: kw.score,
+                      });
                       found = true;
                     } else {
                       // Walk along Archimedean spiral
@@ -1393,16 +1577,18 @@ function SentenceTokenCard({ sentence, selectedModel }) {
                       <text
                         key={`${item.word}-${idx}`}
                         x={item.x + item.width / 2}
-                        y={item.y + item.height - (item.fontSize * 0.1)} // baseline adjustment
+                        y={item.y + item.height - item.fontSize * 0.1} // baseline adjustment
                         textAnchor="middle"
                         title={`${item.score}% spam probability`}
                         style={{
                           fontSize: `${item.fontSize}px`,
                           fontWeight: 900,
                           fill: getWordColor(item.word, item.score),
-                          fontFamily: '"Impact", "Anton", "Arial Black", sans-serif',
+                          fontFamily:
+                            '"Impact", "Anton", "Arial Black", sans-serif',
                           cursor: "default",
-                          transition: "transform 0.15s ease, fill-opacity 0.15s ease",
+                          transition:
+                            "transform 0.15s ease, fill-opacity 0.15s ease",
                           transformOrigin: `${item.x + item.width / 2}px ${item.y + item.height / 2}px`,
                         }}
                         onMouseOver={(e) => {
@@ -1535,7 +1721,13 @@ function SimpleWordCloud({ words }) {
             }
 
             if (!overlap) {
-              placed.push({ ...box, word: text, fontSize, percentage: wordInfo.percentage, count: wordInfo.count });
+              placed.push({
+                ...box,
+                word: text,
+                fontSize,
+                percentage: wordInfo.percentage,
+                count: wordInfo.count,
+              });
               found = true;
             } else {
               radius += 0.5;
@@ -1563,13 +1755,18 @@ function SimpleWordCloud({ words }) {
           <Box
             component="svg"
             viewBox={`0 0 ${width} ${height}`}
-            sx={{ width: "100%", height: "100%", maxHeight: height, overflow: "visible" }}
+            sx={{
+              width: "100%",
+              height: "100%",
+              maxHeight: height,
+              overflow: "visible",
+            }}
           >
             {placed.map((item, idx) => (
               <text
                 key={`${item.word}-${idx}`}
                 x={item.x + item.width / 2}
-                y={item.y + item.height - (item.fontSize * 0.1)}
+                y={item.y + item.height - item.fontSize * 0.1}
                 textAnchor="middle"
                 title={`${item.percentage}% of spam emails contain this (${item.count} occurrences)`}
                 style={{
@@ -1609,11 +1806,23 @@ function GroupedBarChart({ summaries, models }) {
   maxCount = maxCount || 1;
 
   return (
-    <Card sx={{ ...cardSx, height: "100%", position: "relative" }} id="export-grouped-bar-chart">
+    <Card
+      sx={{ ...cardSx, height: "100%", position: "relative" }}
+      id="export-grouped-bar-chart"
+    >
       <CardContent
-        sx={{ height: "100%", display: "flex", flexDirection: "column" }}
+        sx={{
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+        }}
       >
-        <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ pr: 5 }}>
+        <Stack
+          direction="row"
+          justifyContent="space-between"
+          alignItems="flex-start"
+          sx={{ pr: 5 }}
+        >
           <Box>
             <Typography variant="h6" fontWeight={800} sx={{ mb: 1 }}>
               Model Predictions (Count)
@@ -1625,7 +1834,12 @@ function GroupedBarChart({ summaries, models }) {
         </Stack>
         <IconButton
           className="export-btn-hide"
-          onClick={() => handleExportComponent("export-grouped-bar-chart", "model-predictions.png")}
+          onClick={() =>
+            handleExportComponent(
+              "export-grouped-bar-chart",
+              "model-predictions.png",
+            )
+          }
           size="small"
           title="Download Image"
           sx={{
@@ -1769,6 +1983,10 @@ function GroupedBarChart({ summaries, models }) {
         <Stack
           direction="row"
           justifyContent="center"
+          style={{
+            paddingTop: "1rem",
+            margin: "auto",
+          }}
           spacing={3}
           sx={{ mt: 5 }}
         >
@@ -1782,7 +2000,11 @@ function GroupedBarChart({ summaries, models }) {
                 borderRadius: 0.5,
               }}
             />
-            <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1 }}>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ lineHeight: 1 }}
+            >
               Spam
             </Typography>
           </Stack>
@@ -1796,7 +2018,11 @@ function GroupedBarChart({ summaries, models }) {
                 borderRadius: 0.5,
               }}
             />
-            <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1 }}>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ lineHeight: 1 }}
+            >
               Ham
             </Typography>
           </Stack>
@@ -1828,9 +2054,20 @@ function CsvBatchDashboard({ result }) {
           gap: 2,
         }}
       >
-        <Card sx={{ ...cardSx, height: "100%", display: "flex", alignItems: "center" }}>
+        <Card
+          sx={{
+            ...cardSx,
+            height: "100%",
+            display: "flex",
+            alignItems: "center",
+          }}
+        >
           <CardContent sx={{ py: { xs: 4, lg: 0 }, width: "100%" }}>
-            <Typography variant="overline" color="text.secondary" display="block">
+            <Typography
+              variant="overline"
+              color="text.secondary"
+              display="block"
+            >
               CSV Batch Summary
             </Typography>
             <Typography variant="h3" fontWeight={900} sx={{ my: 1 }}>
@@ -1877,12 +2114,15 @@ function CsvBatchDashboard({ result }) {
 const handleExportComponent = async (elementId, filename) => {
   const element = document.getElementById(elementId);
   if (!element) return;
-  
+
   const exportBtns = element.querySelectorAll(".export-btn-hide");
-  exportBtns.forEach(btn => btn.style.display = 'none');
-  
+  exportBtns.forEach((btn) => (btn.style.display = "none"));
+
   try {
-    const canvas = await html2canvas(element, { backgroundColor: "#ffffff", scale: 2 });
+    const canvas = await html2canvas(element, {
+      backgroundColor: "#ffffff",
+      scale: 2,
+    });
     const link = document.createElement("a");
     link.download = filename;
     link.href = canvas.toDataURL("image/png");
@@ -1890,7 +2130,7 @@ const handleExportComponent = async (elementId, filename) => {
   } catch (err) {
     console.error("Export failed:", err);
   } finally {
-    exportBtns.forEach(btn => btn.style.display = '');
+    exportBtns.forEach((btn) => (btn.style.display = ""));
   }
 };
 
@@ -1956,10 +2196,10 @@ export default function SpamCheckPage() {
         const formData = new FormData();
         formData.append("file", selectedCsvFile);
 
-        const response = await fetch(
-          `${API_BASE_URL}/predict/csv`,
-          { method: "POST", body: formData },
-        );
+        const response = await fetch(`${API_BASE_URL}/predict/csv`, {
+          method: "POST",
+          body: formData,
+        });
         const payload = await response.json();
         if (!response.ok || payload.success === false) {
           throw new Error(payload.error || "CSV batch prediction failed.");
@@ -2003,16 +2243,28 @@ export default function SpamCheckPage() {
 
   return (
     <Box sx={{ pb: 3 }}>
-      <Box sx={{ mb: 2.5, display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+      <Box
+        sx={{
+          mb: 2.5,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "flex-start",
+        }}
+      >
         <Box>
           <Typography variant="h4" fontWeight={800} sx={{ mb: 0.5 }}>
             Email Spam Detector
           </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 700, lineHeight: 1.6 }}>
-            Powered by machine learning models trained via Scikit-Learn (Naive Bayes, K-Means Clustering, Logistic Regression, and Linear SVM).
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ maxWidth: 700, lineHeight: 1.6 }}
+          >
+            Powered by machine learning models trained via Scikit-Learn (Naive
+            Bayes, K-Means Clustering, Logistic Regression, and Linear SVM).
           </Typography>
           <Box sx={{ mt: 1.5 }}>
-            <Chip 
+            <Chip
               label="View Training Dataset"
               component="a"
               href="https://liveswinburneeduau-my.sharepoint.com/:f:/g/personal/105292899_student_swin_edu_au/IgArWPNGyw_GTa-5LNHZSanxAT9Ok7633LuMn-NqIE9SUz0?e=axdxlL"
@@ -2128,9 +2380,7 @@ export default function SpamCheckPage() {
           </CardContent>
         </Card>
 
-        {activeTab !== 2 && (
-          <OverallAssessment prediction={activePrediction} />
-        )}
+        {activeTab !== 2 && <OverallAssessment prediction={activePrediction} />}
       </Box>
 
       {activeTab === 2 || csvAnalysisResult ? (
@@ -2140,7 +2390,10 @@ export default function SpamCheckPage() {
           <Box
             sx={{
               display: "grid",
-              gridTemplateColumns: { xs: "1fr", lg: "minmax(0, 8fr) minmax(280px, 4fr)" },
+              gridTemplateColumns: {
+                xs: "1fr",
+                lg: "minmax(0, 8fr) minmax(280px, 4fr)",
+              },
               gap: 2,
             }}
           >
@@ -2158,7 +2411,10 @@ export default function SpamCheckPage() {
           <Box
             sx={{
               display: "grid",
-              gridTemplateColumns: { xs: "1fr", lg: "minmax(0, 8fr) minmax(280px, 4fr)" },
+              gridTemplateColumns: {
+                xs: "1fr",
+                lg: "minmax(0, 8fr) minmax(280px, 4fr)",
+              },
               gap: 2,
             }}
           >
