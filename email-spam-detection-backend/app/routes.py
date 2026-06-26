@@ -236,9 +236,14 @@ async def predict_csv(
     word_counts = Counter()
     total_spam_emails = len(spam_texts)
     
+    try:
+        stop_words = set(stopwords.words("english"))
+    except Exception:
+        stop_words = set()
+    
     for text in spam_texts:
         cleaned_text = clean_text(text)
-        words = re.findall(r'\b[a-z]{3,}\b', cleaned_text)
+        words = [w for w in re.findall(r'\b[a-z]{3,}\b', cleaned_text) if w not in stop_words]
         word_counts.update(set(words))
 
     top_spam_words = []

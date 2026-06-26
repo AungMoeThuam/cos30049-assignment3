@@ -937,6 +937,180 @@ function SentenceTokenCard({ sentence, selectedModel }) {
 }
 
 
+function SimpleWordCloud({ words }) {
+  if (!words || words.length === 0) {
+    return (
+      <Typography color="text.secondary">
+        No spam keywords were returned for this batch.
+      </Typography>
+    )
+  }
+
+  const maxCount = Math.max(...words.map(w => w.count), 1);
+  const minCount = Math.min(...words.map(w => w.count), 0);
+
+  const getFontSize = (count) => {
+    if (maxCount === minCount) return 24;
+    const ratio = (count - minCount) / (maxCount - minCount);
+    return 14 + ratio * 46; 
+  }
+
+  const getColor = (count) => {
+    if (maxCount === minCount) return d3.interpolateReds(0.7);
+    const ratio = (count - minCount) / (maxCount - minCount);
+    return d3.interpolateReds(0.4 + ratio * 0.5);
+  }
+
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        flexWrap: "wrap",
+        gap: 3,
+        justifyContent: "center",
+        alignItems: "center",
+        minHeight: 200,
+        p: 4,
+        bgcolor: "#f7f9fb",
+        borderRadius: 2,
+        border: "1px dashed",
+        borderColor: "divider",
+      }}
+    >
+      {words.map((word) => (
+        <Box
+          key={word.word}
+          title={`${word.percentage}% (${word.count} occurrences)`}
+          sx={{
+            cursor: "pointer",
+            transition: "transform 0.2s",
+            "&:hover": {
+              transform: "scale(1.1)",
+            },
+          }}
+        >
+          <Typography
+            sx={{
+              fontSize: getFontSize(word.count),
+              fontWeight: 800,
+              color: getColor(word.count),
+              lineHeight: 1,
+            }}
+          >
+            {word.word}
+          </Typography>
+        </Box>
+      ))}
+    </Box>
+  )
+}
+
+function GroupedBarChart({ summaries, models }) {
+  let maxCount = 0;
+  models.forEach(m => {
+    const s = summaries[m.key] ?? {};
+    maxCount = Math.max(maxCount, s.spam_count ?? 0, s.ham_count ?? 0);
+  });
+  maxCount = maxCount || 1;
+
+  return (
+    <Card sx={cardSx}>
+      <CardContent sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+        <Typography variant="h6" fontWeight={800} sx={{ mb: 1 }}>
+          Model Predictions (Count)
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
+          Absolute volume of Spam vs Ham flagged by each model.
+        </Typography>
+        
+        <Box sx={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-around', height: 240, pt: 3, pb: 4, borderBottom: '1px solid', borderColor: 'divider', position: 'relative' }}>
+          {models.map(model => {
+            const summary = summaries[model.key] ?? {};
+            const spam = summary.spam_count ?? 0;
+            const ham = summary.ham_count ?? 0;
+            const spamHeight = (spam / maxCount) * 100;
+            const hamHeight = (ham / maxCount) * 100;
+
+            return (
+              <Box key={model.key} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '20%', position: 'relative', height: '100%' }}>
+                <Box sx={{ display: 'flex', alignItems: 'flex-end', gap: 1, height: '100%', width: '100%', justifyContent: 'center' }}>
+                  <Box 
+                    title={`Spam: ${spam}`}
+                    sx={{ 
+                      width: '40%', 
+                      maxWidth: 32, 
+                      height: `${spamHeight}%`, 
+                      bgcolor: 'error.main', 
+                      borderRadius: '4px 4px 0 0',
+                      transition: 'height 0.5s ease',
+                      position: 'relative',
+                      display: 'flex',
+                      justifyContent: 'center',
+                    }} 
+                  >
+                    <Typography 
+                      variant="caption" 
+                      sx={{ 
+                        position: 'absolute', 
+                        top: '-22px', 
+                        fontWeight: 800, 
+                        color: 'error.main',
+                        fontSize: '12px'
+                      }}
+                    >
+                      {spam}
+                    </Typography>
+                  </Box>
+                  <Box 
+                    title={`Ham: ${ham}`}
+                    sx={{ 
+                      width: '40%', 
+                      maxWidth: 32, 
+                      height: `${hamHeight}%`, 
+                      bgcolor: 'success.main', 
+                      borderRadius: '4px 4px 0 0',
+                      transition: 'height 0.5s ease',
+                      position: 'relative',
+                      display: 'flex',
+                      justifyContent: 'center',
+                    }} 
+                  >
+                    <Typography 
+                      variant="caption" 
+                      sx={{ 
+                        position: 'absolute', 
+                        top: '-22px', 
+                        fontWeight: 800, 
+                        color: 'success.main',
+                        fontSize: '12px'
+                      }}
+                    >
+                      {ham}
+                    </Typography>
+                  </Box>
+                </Box>
+                <Typography variant="caption" color="text.secondary" sx={{ position: 'absolute', bottom: -28, textAlign: 'center', whiteSpace: 'nowrap' }}>
+                  {model.label.replace(" Clustering", "").replace(" Regression", " Reg")}
+                </Typography>
+              </Box>
+            )
+          })}
+        </Box>
+        <Stack direction="row" justifyContent="center" spacing={3} sx={{ mt: 5 }}>
+          <Stack direction="row" alignItems="center" spacing={1}>
+            <Box sx={{ width: 12, height: 12, bgcolor: 'error.main', borderRadius: 0.5 }} />
+            <Typography variant="caption" color="text.secondary">Spam</Typography>
+          </Stack>
+          <Stack direction="row" alignItems="center" spacing={1}>
+            <Box sx={{ width: 12, height: 12, bgcolor: 'success.main', borderRadius: 0.5 }} />
+            <Typography variant="caption" color="text.secondary">Ham</Typography>
+          </Stack>
+        </Stack>
+      </CardContent>
+    </Card>
+  )
+}
+
 function CsvBatchDashboard({ result }) {
   if (!result) {
     return (
@@ -964,72 +1138,25 @@ function CsvBatchDashboard({ result }) {
         </CardContent>
       </Card>
 
-      <Box
-        sx={{
-          display: "grid",
-          gridTemplateColumns: { xs: "1fr", md: "repeat(4, 1fr)" },
-          gap: 2,
-        }}
-      >
-        {MODELS.map((model) => {
-          const summary = summaries[model.key] ?? {}
-          const spamCount = summary.spam_count ?? 0
-          const hamCount = summary.ham_count ?? 0
-          const total = spamCount + hamCount || 1
-          const spamShare = Math.round((spamCount / total) * 100)
-
-          return (
-            <Card key={model.key} sx={cardSx}>
-              <CardContent>
-                <Typography variant="subtitle2" fontWeight={800}>
-                  {model.label}
-                </Typography>
-                <LinearProgress
-                  variant="determinate"
-                  value={spamShare}
-                  color="error"
-                  sx={{ height: 10, borderRadius: 1, my: 1.5 }}
-                />
-                <Typography variant="body2" color="error.main">
-                  Spam: {spamCount} ({spamShare}%)
-                </Typography>
-                <Typography variant="body2" color="success.main">
-                  Ham: {hamCount} ({100 - spamShare}%)
-                </Typography>
-              </CardContent>
-            </Card>
-          )
-        })}
+      <Box>
+        <GroupedBarChart summaries={summaries} models={MODELS} />
       </Box>
 
       <Card sx={cardSx}>
         <CardContent>
-          <Typography variant="h5" fontWeight={800}>
+          <Typography variant="h5" fontWeight={800} sx={{ mb: 3 }}>
             Top Spam Keywords
           </Typography>
-          <Stack spacing={1.5} sx={{ mt: 2 }}>
-            {topWords.length ? (
-              topWords.map((word) => (
-                <Box key={word.word}>
-                  <Stack direction="row" justifyContent="space-between">
-                    <Typography fontWeight={800}>{word.word}</Typography>
-                    <Typography color="text.secondary">
-                      {word.percentage}% ({word.count} count)
-                    </Typography>
-                  </Stack>
-                  <LinearProgress
-                    variant="determinate"
-                    value={word.percentage}
-                    sx={{ height: 9, borderRadius: 1, mt: 0.5 }}
-                  />
-                </Box>
-              ))
-            ) : (
-              <Typography color="text.secondary">
-                No spam keywords were returned for this batch.
-              </Typography>
-            )}
-          </Stack>
+          <SimpleWordCloud words={topWords} />
+          
+          <Alert severity="info" sx={{ mt: 3, '& .MuiAlert-message': { width: '100%' } }}>
+            <Typography variant="subtitle2" fontWeight={800} sx={{ mb: 0.5 }}>
+              Understanding Special Tokens
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              During the content analysis, our AI automatically anonymizes and groups certain patterns. If you see words like <strong>phonenumber</strong>, <strong>url</strong>, <strong>email</strong>, <strong>percentage</strong>, or <strong>number</strong> in the cloud above, these represent categories of data found in the text rather than literal words.
+            </Typography>
+          </Alert>
         </CardContent>
       </Card>
     </Stack>
