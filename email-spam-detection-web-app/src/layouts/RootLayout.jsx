@@ -113,7 +113,7 @@ export default function RootLayout() {
       </AppBar>
 
       {/* Main Content Area */}
-      <Container maxWidth="lg" sx={{ mt: 6, mb: 8, flexGrow: 1 }}>
+      <Container maxWidth="xl" sx={{ mt: 6, mb: 8, flexGrow: 1 }}>
         <Outlet />
       </Container>
 
@@ -134,7 +134,7 @@ export default function RootLayout() {
             flexDirection: { xs: "column", md: "row" },
             justifyContent: "space-between",
             alignItems: "center",
-            maxWidth: "lg",
+            maxWidth: "xl",
             mx: "auto",
             gap: 2,
           }}
