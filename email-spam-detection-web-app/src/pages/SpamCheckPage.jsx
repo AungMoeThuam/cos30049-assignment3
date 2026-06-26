@@ -434,14 +434,16 @@ function OverallAssessment({ prediction }) {
           <Box sx={{ my: 2 }}>
             <ConfidenceGauge value={0} label="ham" />
           </Box>
-          <Chip
-            variant="outlined"
-            label="WAITING FOR ANALYSIS"
-            sx={{ fontWeight: 800, fontSize: 11 }}
-          />
-          <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 1 }}>
-            Confidence appears after content analysis.
-          </Typography>
+          <Stack spacing={1} sx={{ mt: 1, alignItems: "center" }}>
+            <Chip
+              variant="outlined"
+              label="WAITING FOR ANALYSIS"
+              sx={{ fontWeight: 800, fontSize: 11, alignSelf: "center" }}
+            />
+            <Typography variant="caption" color="text.secondary" display="block">
+              Confidence appears after content analysis.
+            </Typography>
+          </Stack>
         </CardContent>
       </Card>
     )
@@ -461,14 +463,16 @@ function OverallAssessment({ prediction }) {
             label={prediction.label}
           />
         </Box>
-        <Chip
-          color={isSpam ? "error" : "success"}
-          label={isSpam ? "CLASSIFIED AS SPAM" : "CLASSIFIED AS SAFE (HAM)"}
-          sx={{ fontWeight: 800, px: 1, fontSize: 11 }}
-        />
-        <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 1 }}>
-          Confidence from the selected active classifier.
-        </Typography>
+        <Stack spacing={1} sx={{ mt: 1, alignItems: "center" }}>
+          <Chip
+            color={isSpam ? "error" : "success"}
+            label={isSpam ? "CLASSIFIED AS SPAM" : "CLASSIFIED AS SAFE (HAM)"}
+            sx={{ fontWeight: 800, px: 1, fontSize: 11, alignSelf: "center" }}
+          />
+          <Typography variant="caption" color="text.secondary" display="block">
+            Confidence from the selected active classifier.
+          </Typography>
+        </Stack>
       </CardContent>
     </Card>
   )
