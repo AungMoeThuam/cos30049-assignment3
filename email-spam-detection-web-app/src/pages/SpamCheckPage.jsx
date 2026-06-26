@@ -1554,7 +1554,7 @@ function GroupedBarChart({ summaries, models }) {
   maxCount = maxCount || 1;
 
   return (
-    <Card sx={cardSx} id="export-grouped-bar-chart">
+    <Card sx={{ ...cardSx, height: "100%" }} id="export-grouped-bar-chart">
       <CardContent
         sx={{ height: "100%", display: "flex", flexDirection: "column" }}
       >
@@ -1744,20 +1744,28 @@ function CsvBatchDashboard({ result }) {
   const topWords = result.top_spam_words ?? [];
 
   return (
-    <Stack spacing={3}>
-      <Card sx={cardSx}>
-        <CardContent>
-          <Typography variant="overline" color="text.secondary">
-            CSV Batch Summary
-          </Typography>
-          <Typography variant="h3" fontWeight={900}>
-            {result.total_emails ?? 0}
-          </Typography>
-          <Typography color="text.secondary">Total emails processed</Typography>
-        </CardContent>
-      </Card>
+    <Stack spacing={2}>
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: { xs: "1fr", lg: "3fr 9fr" },
+          gap: 2,
+        }}
+      >
+        <Card sx={{ ...cardSx, height: "100%", display: "flex", alignItems: "center" }}>
+          <CardContent sx={{ py: { xs: 4, lg: 0 }, width: "100%" }}>
+            <Typography variant="overline" color="text.secondary" display="block">
+              CSV Batch Summary
+            </Typography>
+            <Typography variant="h3" fontWeight={900} sx={{ my: 1 }}>
+              {result.total_emails ?? 0}
+            </Typography>
+            <Typography color="text.secondary" variant="body2">
+              Total emails processed
+            </Typography>
+          </CardContent>
+        </Card>
 
-      <Box>
         <GroupedBarChart summaries={summaries} models={MODELS} />
       </Box>
 
