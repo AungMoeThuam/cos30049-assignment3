@@ -235,7 +235,7 @@ function ModelComparison({ result, selectedModel, onSelectedModelChange }) {
               Compare spam and safe probabilities across all classifiers.
             </Typography>
           </Box>
-          <Stack direction="row" spacing={1} alignItems="center" sx={{ pr: { xs: 0, md: 5 } }}>
+          <Stack direction="row" spacing={2} alignItems="center">
             <FormControl size="small" sx={{ minWidth: 220 }}>
               <InputLabel id="classifier-label">Active Classifier</InputLabel>
               <Select
@@ -251,35 +251,31 @@ function ModelComparison({ result, selectedModel, onSelectedModelChange }) {
                 ))}
               </Select>
             </FormControl>
+            <IconButton
+              className="export-btn-hide"
+              onClick={() => handleExportComponent("export-model-comparison", "model-comparison.png")}
+              size="small"
+              title="Download Image"
+              sx={{
+                border: "1px solid",
+                borderColor: "divider",
+                borderRadius: "50%",
+                p: 0.75,
+                transition: "all 0.2s ease-in-out",
+                bgcolor: "background.paper",
+                color: "text.secondary",
+                "&:hover": {
+                  bgcolor: "action.hover",
+                  color: "text.primary",
+                  transform: "scale(1.08)",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                },
+              }}
+            >
+              <DownloadIcon fontSize="small" />
+            </IconButton>
           </Stack>
         </Box>
-        <IconButton
-          className="export-btn-hide"
-          onClick={() => handleExportComponent("export-model-comparison", "model-comparison.png")}
-          size="small"
-          title="Download Image"
-          sx={{
-            position: "absolute",
-            top: 16,
-            right: 16,
-            border: "1px solid",
-            borderColor: "divider",
-            borderRadius: "50%",
-            p: 0.75,
-            transition: "all 0.2s ease-in-out",
-            bgcolor: "background.paper",
-            color: "text.secondary",
-            zIndex: 1,
-            "&:hover": {
-              bgcolor: "action.hover",
-              color: "text.primary",
-              transform: "scale(1.08)",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-            },
-          }}
-        >
-          <DownloadIcon fontSize="small" />
-        </IconButton>
 
         <Box
           sx={{
