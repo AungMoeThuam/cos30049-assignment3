@@ -268,11 +268,16 @@ function ModelComparison({ result, selectedModel, onSelectedModelChange }) {
   return (
     <Card sx={cardSx}>
       <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
-        <Stack
-          direction={{ xs: "column", md: "row" }}
-          justifyContent="space-between"
-          spacing={2}
-          sx={{ mb: 2 }}
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: { xs: "column", md: "row" },
+            justifyContent: "space-between",
+            alignItems: { xs: "flex-start", md: "center" },
+            gap: 2,
+            mb: 2,
+            width: "100%",
+          }}
         >
           <Box>
             <Typography variant="caption" color="text.secondary" display="block">
@@ -297,13 +302,14 @@ function ModelComparison({ result, selectedModel, onSelectedModelChange }) {
               ))}
             </Select>
           </FormControl>
-        </Stack>
+        </Box>
 
         <Box
           sx={{
             display: "grid",
             gridTemplateColumns: { xs: "1fr", lg: "minmax(220px, 0.9fr) minmax(0, 2fr)" },
             gap: 3,
+            mb: 3.5,
           }}
         >
           <Box
@@ -358,63 +364,110 @@ function ModelComparison({ result, selectedModel, onSelectedModelChange }) {
             ))}
           </Box>
 
-          <Box sx={{ minHeight: 220, display: "grid", gridTemplateColumns: "36px 1fr", gap: 1 }}>
-            <Stack justifyContent="space-between" alignItems="flex-end" sx={{ pb: 3 }}>
-              {[100, 50, 0].map((tick) => (
-                <Typography key={tick} variant="caption" color="text.secondary">
-                  {tick}%
-                </Typography>
-              ))}
-            </Stack>
-            <Box
-              sx={{
-                position: "relative",
-                borderBottom: "1px solid",
-                borderColor: "divider",
-                display: "flex",
-                alignItems: "flex-end",
-                justifyContent: "space-around",
-                gap: 2,
-                px: 2,
-                pb: 3,
-                background:
-                  "linear-gradient(to bottom, rgba(198,198,205,.35) 1px, transparent 1px) 0 0 / 100% 50%",
-              }}
-            >
-              {predictions.map(({ key, label, prediction }) => {
-                const spam = percent(prediction?.spam_probability)
-                const ham = percent(prediction?.ham_probability)
-                return (
-                  <Box
-                    key={key}
-                    sx={{
-                      height: 180,
-                      flex: 1,
-                      minWidth: 44,
-                      display: "flex",
-                      alignItems: "flex-end",
-                      gap: 0.5,
-                      position: "relative",
-                    }}
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "flex-end",
+              height: "100%",
+            }}
+          >
+            <Box sx={{ display: "grid", gridTemplateColumns: "36px 1fr", gap: 1 }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-between",
+                  alignItems: "flex-end",
+                  height: 180,
+                  pr: 0.5,
+                }}
+              >
+                {[100, 50, 0].map((tick) => (
+                  <Typography
+                    key={tick}
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ lineHeight: 1, height: 12, display: "flex", alignItems: "center" }}
                   >
-                    <Box sx={{ flex: 1, height: `${spam}%`, bgcolor: "error.main", borderRadius: "4px 4px 0 0" }} />
-                    <Box sx={{ flex: 1, height: `${ham}%`, bgcolor: "#22c55e", borderRadius: "4px 4px 0 0" }} />
-                    <Typography
-                      variant="caption"
-                      color="text.secondary"
+                    {tick}%
+                  </Typography>
+                ))}
+              </Box>
+              <Box
+                sx={{
+                  height: 180,
+                  position: "relative",
+                  borderBottom: "1px solid",
+                  borderColor: "divider",
+                  display: "flex",
+                  alignItems: "flex-end",
+                  justifyContent: "space-around",
+                  gap: 2,
+                  px: 2,
+                  background:
+                    "linear-gradient(to bottom, rgba(198,198,205,.35) 1px, transparent 1px) 0 0 / 100% 50%",
+                }}
+              >
+                {predictions.map(({ key, label, prediction }) => {
+                  const spam = percent(prediction?.spam_probability)
+                  const ham = percent(prediction?.ham_probability)
+                  const isActive = selectedModel === key
+                  return (
+                    <Box
+                      key={key}
+                      onClick={() => onSelectedModelChange(key)}
                       sx={{
-                        position: "absolute",
-                        left: "50%",
-                        bottom: -28,
-                        transform: "translateX(-50%)",
-                        whiteSpace: "nowrap",
+                        height: "100%",
+                        flex: 1,
+                        minWidth: 44,
+                        display: "flex",
+                        alignItems: "flex-end",
+                        gap: 0.5,
+                        position: "relative",
+                        cursor: "pointer",
+                        borderRadius: "4px 4px 0 0",
+                        transition: "background-color 0.2s ease",
+                        "&:hover": {
+                          bgcolor: "action.hover",
+                        },
                       }}
                     >
-                      {label.replace(" Clustering", "").replace(" Regression", " Reg")}
-                    </Typography>
-                  </Box>
-                )
-              })}
+                      <Box
+                        sx={{
+                          flex: 1,
+                          height: `${spam}%`,
+                          bgcolor: isActive ? "error.main" : "#fca5a5",
+                          borderRadius: "4px 4px 0 0",
+                          transition: "background-color 0.3s ease",
+                        }}
+                      />
+                      <Box
+                        sx={{
+                          flex: 1,
+                          height: `${ham}%`,
+                          bgcolor: isActive ? "#22c55e" : "#86efac",
+                          borderRadius: "4px 4px 0 0",
+                          transition: "background-color 0.3s ease",
+                        }}
+                      />
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{
+                          position: "absolute",
+                          left: "50%",
+                          bottom: -24,
+                          transform: "translateX(-50%)",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {label.replace(" Clustering", "").replace(" Regression", " Reg")}
+                      </Typography>
+                    </Box>
+                  );
+                })}
+              </Box>
             </Box>
           </Box>
         </Box>
