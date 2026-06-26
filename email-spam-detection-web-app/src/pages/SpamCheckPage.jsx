@@ -1553,19 +1553,28 @@ export default function SpamCheckPage() {
         <CsvBatchDashboard result={csvAnalysisResult} />
       ) : (
         <Stack spacing={2}>
-          <ModelComparison
-            result={singleAnalysisResult}
-            selectedModel={selectedModel}
-            onSelectedModelChange={setSelectedModel}
-          />
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", lg: "minmax(0, 8fr) minmax(280px, 4fr)" },
+              gap: 2,
+            }}
+          >
+            <ModelComparison
+              result={singleAnalysisResult}
+              selectedModel={selectedModel}
+              onSelectedModelChange={setSelectedModel}
+            />
+            <FeatureRadarChart
+              features={emailFeatures}
+              averages={featureAverages}
+            />
+          </Box>
 
           <Box
             sx={{
               display: "grid",
-              gridTemplateColumns: {
-                xs: "1fr",
-                lg: "minmax(0, 8fr) minmax(280px, 4fr)",
-              },
+              gridTemplateColumns: { xs: "1fr", lg: "minmax(0, 8fr) minmax(280px, 4fr)" },
               gap: 2,
             }}
           >
@@ -1577,16 +1586,10 @@ export default function SpamCheckPage() {
               selectedSentence={selectedSentence}
               onSentenceSelect={setSelectedSentence}
             />
-            <Stack spacing={2}>
-              <FeatureRadarChart
-                features={emailFeatures}
-                averages={featureAverages}
-              />
-              <SentenceTokenCard
-                sentence={selectedSentence}
-                selectedModel={selectedModel}
-              />
-            </Stack>
+            <SentenceTokenCard
+              sentence={selectedSentence}
+              selectedModel={selectedModel}
+            />
           </Box>
         </Stack>
       )}
