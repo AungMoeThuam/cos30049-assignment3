@@ -2110,6 +2110,25 @@ export default function SpamCheckPage() {
               selectedModel={selectedModel}
             />
           </Box>
+
+          {singleAnalysisResult?.sentences?.length ? (
+            <Alert
+              severity="info"
+              sx={{ "& .MuiAlert-message": { width: "100%" } }}
+            >
+              <Typography variant="subtitle2" fontWeight={800} sx={{ mb: 0.5 }}>
+                Understanding Special Tokens
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                During the content analysis, our AI automatically anonymizes and
+                groups certain patterns. If you see words like{" "}
+                <strong>phonenumber</strong>, <strong>url</strong>,{" "}
+                <strong>email</strong>, <strong>percentage</strong>, or{" "}
+                <strong>number</strong> in the cloud above, these represent
+                categories of data found in the text rather than literal words.
+              </Typography>
+            </Alert>
+          ) : null}
         </Stack>
       )}
 
