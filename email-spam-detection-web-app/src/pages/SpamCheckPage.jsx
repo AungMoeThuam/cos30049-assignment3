@@ -974,8 +974,8 @@ function SentenceHeatmap({
   }
 
   return (
-    <Card sx={cardSx} id="export-sentence-heatmap">
-      <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
+    <Card sx={{ ...cardSx, height: "100%", display: "flex", flexDirection: "column" }} id="export-sentence-heatmap">
+      <CardContent sx={{ p: 2, "&:last-child": { pb: 2 }, display: "flex", flexDirection: "column", flexGrow: 1 }}>
         <Stack
           direction={{ xs: "column", md: "row" }}
           justifyContent="space-between"
@@ -1140,8 +1140,8 @@ function SentenceTokenCard({ sentence, selectedModel }) {
   }, [sentence]);
 
   return (
-    <Card sx={cardSx}>
-      <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
+    <Card sx={{ ...cardSx, height: "100%", display: "flex", flexDirection: "column" }}>
+      <CardContent sx={{ p: 2, "&:last-child": { pb: 2 }, display: "flex", flexDirection: "column", flexGrow: 1 }}>
         <Typography
           variant="caption"
           color="text.secondary"
@@ -1162,43 +1162,65 @@ function SentenceTokenCard({ sentence, selectedModel }) {
             <CircularProgress size={24} />
           </Stack>
         ) : tokenData?.tokens?.length ? (
-          <Stack spacing={1}>
-            {tokenData.tokens
-              .map((t) => ({
-                word: t.token,
-                score: percent(t.models?.[selectedModel]?.spam_probability),
-              }))
-              .sort((a, b) => b.score - a.score)
-              .slice(0, 6)
-              .map((kw) => (
-                <Paper
-                  key={kw.word}
-                  variant="outlined"
-                  sx={{
-                    p: 1,
-                    borderRadius: 1,
-                    bgcolor: "#f7f9fb",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    gap: 1,
-                  }}
-                >
-                  <Typography variant="body2">{kw.word}</Typography>
-                  <Chip
-                    size="small"
-                    label={`${kw.score}%`}
-                    color={kw.score >= 50 ? "error" : "default"}
+          <Box
+            sx={{
+              flexGrow: 1,
+              overflowY: "auto",
+              maxHeight: 280,
+              pr: 0.5,
+              "&::-webkit-scrollbar": {
+                width: "6px",
+              },
+              "&::-webkit-scrollbar-track": {
+                background: "transparent",
+              },
+              "&::-webkit-scrollbar-thumb": {
+                background: "rgba(0,0,0,0.1)",
+                borderRadius: "4px",
+              },
+              "&::-webkit-scrollbar-thumb:hover": {
+                background: "rgba(0,0,0,0.15)",
+              },
+            }}
+          >
+            <Stack spacing={1}>
+              {tokenData.tokens
+                .map((t) => ({
+                  word: t.token,
+                  score: percent(t.models?.[selectedModel]?.spam_probability),
+                }))
+                .sort((a, b) => b.score - a.score)
+                .slice(0, 15)
+                .map((kw) => (
+                  <Paper
+                    key={kw.word}
                     variant="outlined"
                     sx={{
-                      height: 24,
-                      fontWeight: 800,
-                      bgcolor: kw.score >= 50 ? "#ffdad6" : undefined,
+                      p: 1,
+                      borderRadius: 1,
+                      bgcolor: "#f7f9fb",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      gap: 1,
                     }}
-                  />
-                </Paper>
-              ))}
-          </Stack>
+                  >
+                    <Typography variant="body2">{kw.word}</Typography>
+                    <Chip
+                      size="small"
+                      label={`${kw.score}%`}
+                      color={kw.score >= 50 ? "error" : "default"}
+                      variant="outlined"
+                      sx={{
+                        height: 24,
+                        fontWeight: 800,
+                        bgcolor: kw.score >= 50 ? "#ffdad6" : undefined,
+                      }}
+                    />
+                  </Paper>
+                ))}
+            </Stack>
+          </Box>
         ) : (
           <Typography variant="body2" color="text.secondary">
             No keyword tokens found for this sentence.
