@@ -1032,6 +1032,7 @@ function SentenceHeatmap({
 function SentenceTokenCard({ sentence, selectedModel }) {
   const [tokenData, setTokenData] = useState(null);
   const [isLoadingTokens, setIsLoadingTokens] = useState(false);
+  const [viewMode, setViewMode] = useState("cloud");
 
   useEffect(() => {
     if (!sentence) {
@@ -1067,15 +1068,55 @@ function SentenceTokenCard({ sentence, selectedModel }) {
   return (
     <Card sx={{ ...cardSx, height: "100%", display: "flex", flexDirection: "column" }}>
       <CardContent sx={{ p: 2, "&:last-child": { pb: 2 }, display: "flex", flexDirection: "column", flexGrow: 1 }}>
-        <Typography
-          variant="caption"
-          color="text.secondary"
-          display="block"
-          textTransform="uppercase"
-          sx={{ mb: 1.5 }}
-        >
-          Top Keywords
-        </Typography>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1.5 }}>
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            display="block"
+            textTransform="uppercase"
+          >
+            Top Keywords
+          </Typography>
+          {sentence && tokenData?.tokens?.length && !isLoadingTokens ? (
+            <Stack
+              direction="row"
+              sx={{
+                bgcolor: "#f1f5f9",
+                borderRadius: "20px",
+                p: "3px",
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
+              {["list", "cloud"].map((mode) => (
+                <Box
+                  key={mode}
+                  component="button"
+                  onClick={() => setViewMode(mode)}
+                  sx={{
+                    border: 0,
+                    bgcolor: viewMode === mode ? "#ffffff" : "transparent",
+                    color: viewMode === mode ? "text.primary" : "text.secondary",
+                    borderRadius: "16px",
+                    px: 1.5,
+                    py: 0.5,
+                    fontSize: "11px",
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    textTransform: "uppercase",
+                    boxShadow: viewMode === mode ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
+                    transition: "all 0.2s",
+                    "&:hover": {
+                      color: "text.primary",
+                    },
+                  }}
+                >
+                  {mode}
+                </Box>
+              ))}
+            </Stack>
+          ) : null}
+        </Stack>
 
         {!sentence ? (
           <Typography variant="body2" color="text.secondary">
@@ -1087,66 +1128,145 @@ function SentenceTokenCard({ sentence, selectedModel }) {
             <CircularProgress size={24} />
           </Stack>
         ) : tokenData?.tokens?.length ? (
-          <Box
-            sx={{
-              flexGrow: 1,
-              minHeight: 0,
-              maxHeight: 310,
-              overflowY: "auto",
-              pr: 0.5,
-              "&::-webkit-scrollbar": {
-                width: "6px",
-              },
-              "&::-webkit-scrollbar-track": {
-                background: "transparent",
-              },
-              "&::-webkit-scrollbar-thumb": {
-                background: "rgba(0,0,0,0.1)",
-                borderRadius: "4px",
-              },
-              "&::-webkit-scrollbar-thumb:hover": {
-                background: "rgba(0,0,0,0.15)",
-              },
-            }}
-          >
-            <Stack spacing={1}>
-              {tokenData.tokens
-                .map((t) => ({
-                  word: t.token,
-                  score: percent(t.models?.[selectedModel]?.spam_probability),
-                }))
-                .sort((a, b) => b.score - a.score)
-                .slice(0, 15)
-                .map((kw) => (
-                  <Paper
-                    key={kw.word}
-                    variant="outlined"
-                    sx={{
-                      p: 1,
-                      borderRadius: 1,
-                      bgcolor: "#f7f9fb",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      gap: 1,
-                    }}
-                  >
-                    <Typography variant="body2">{kw.word}</Typography>
-                    <Chip
-                      size="small"
-                      label={`${kw.score}%`}
-                      color={kw.score >= 50 ? "error" : "default"}
+          viewMode === "list" ? (
+            <Box
+              sx={{
+                flexGrow: 1,
+                minHeight: 0,
+                maxHeight: 310,
+                overflowY: "auto",
+                pr: 0.5,
+                "&::-webkit-scrollbar": {
+                  width: "6px",
+                },
+                "&::-webkit-scrollbar-track": {
+                  background: "transparent",
+                },
+                "&::-webkit-scrollbar-thumb": {
+                  background: "rgba(0,0,0,0.1)",
+                  borderRadius: "4px",
+                },
+                "&::-webkit-scrollbar-thumb:hover": {
+                  background: "rgba(0,0,0,0.15)",
+                },
+              }}
+            >
+              <Stack spacing={1}>
+                {tokenData.tokens
+                  .map((t) => ({
+                    word: t.token,
+                    score: percent(t.models?.[selectedModel]?.spam_probability),
+                  }))
+                  .sort((a, b) => b.score - a.score)
+                  .slice(0, 15)
+                  .map((kw) => (
+                    <Paper
+                      key={kw.word}
                       variant="outlined"
                       sx={{
-                        height: 24,
-                        fontWeight: 800,
-                        bgcolor: kw.score >= 50 ? "#ffdad6" : undefined,
+                        p: 1,
+                        borderRadius: 1,
+                        bgcolor: "#f7f9fb",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        gap: 1,
                       }}
-                    />
-                  </Paper>
-                ))}
-            </Stack>
-          </Box>
+                    >
+                      <Typography variant="body2">{kw.word}</Typography>
+                      <Chip
+                        size="small"
+                        label={`${kw.score}%`}
+                        color={kw.score >= 50 ? "error" : "default"}
+                        variant="outlined"
+                        sx={{
+                          height: 24,
+                          fontWeight: 800,
+                          bgcolor: kw.score >= 50 ? "#ffdad6" : undefined,
+                        }}
+                      />
+                    </Paper>
+                  ))}
+              </Stack>
+            </Box>
+          ) : (
+            <Box
+              sx={{
+                flexGrow: 1,
+                minHeight: 0,
+                maxHeight: 310,
+                overflowY: "auto",
+                display: "flex",
+                flexWrap: "wrap",
+                gap: "10px 14px",
+                justifyContent: "center",
+                alignItems: "center",
+                p: 2.5,
+                bgcolor: "#f8fafc",
+                borderRadius: 2,
+                border: "1px dashed",
+                borderColor: "divider",
+                "&::-webkit-scrollbar": {
+                  width: "6px",
+                },
+                "&::-webkit-scrollbar-track": {
+                  background: "transparent",
+                },
+                "&::-webkit-scrollbar-thumb": {
+                  background: "rgba(0,0,0,0.1)",
+                  borderRadius: "4px",
+                },
+                "&::-webkit-scrollbar-thumb:hover": {
+                  background: "rgba(0,0,0,0.15)",
+                },
+              }}
+            >
+              {(() => {
+                const keywords = tokenData.tokens
+                  .map((t) => ({
+                    word: t.token,
+                    score: percent(t.models?.[selectedModel]?.spam_probability),
+                  }))
+                  .sort((a, b) => b.score - a.score)
+                  .slice(0, 15);
+
+                const getWordColor = (score) => {
+                  if (score >= 50) {
+                    const t = (score - 50) / 50;
+                    return d3.interpolateReds(0.5 + t * 0.4);
+                  }
+                  const t = score / 50;
+                  return d3.interpolateGreys(0.45 + t * 0.2);
+                };
+
+                return keywords.map((kw) => (
+                  <Box
+                    key={kw.word}
+                    title={`${kw.score}% spam probability`}
+                    sx={{
+                      cursor: "default",
+                      transition: "transform 0.15s ease, filter 0.15s ease",
+                      "&:hover": {
+                        transform: "scale(1.15)",
+                        filter: "brightness(0.9)",
+                      },
+                    }}
+                  >
+                    <Typography
+                      sx={{
+                        fontSize: 13 + (kw.score / 100) * 15,
+                        fontWeight: kw.score >= 50 ? 800 : 600,
+                        color: getWordColor(kw.score),
+                        lineHeight: 1.1,
+                      }}
+                    >
+                      {kw.word}
+                    </Typography>
+                  </Box>
+                ));
+              })()}
+            </Box>
+          )
         ) : (
           <Typography variant="body2" color="text.secondary">
             No keyword tokens found for this sentence.
