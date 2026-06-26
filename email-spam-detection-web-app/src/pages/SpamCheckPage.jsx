@@ -201,83 +201,7 @@ function ConfidenceGauge({ value, label }) {
   );
 }
 
-function EmptyRadarPlot() {
-  return (
-    <Stack
-      direction={{ xs: "column", sm: "row" }}
-      spacing={3}
-      alignItems="center"
-      sx={{ mt: 2 }}
-    >
-      <Box
-        sx={{
-          width: 176,
-          height: 176,
-          border: "1px solid",
-          borderColor: "divider",
-          borderRadius: "50%",
-          display: "grid",
-          placeItems: "center",
-          bgcolor: "#f7f9fb",
-          position: "relative",
-          overflow: "hidden",
-          "&::before": {
-            content: '""',
-            position: "absolute",
-            inset: "50% 0 auto",
-            borderTop: "1px solid #d8dadc",
-          },
-          "&::after": {
-            content: '""',
-            position: "absolute",
-            inset: 0,
-            background:
-              "linear-gradient(90deg, transparent 49.5%, #d8dadc 50%, transparent 50.5%), linear-gradient(45deg, transparent 49.5%, #d8dadc 50%, transparent 50.5%), linear-gradient(135deg, transparent 49.5%, #d8dadc 50%, transparent 50.5%)",
-          },
-        }}
-      >
-        <Box
-          component="svg"
-          viewBox="0 0 100 100"
-          sx={{ width: 126, height: 126, zIndex: 1 }}
-        >
-          <polygon
-            points="50,14 76,32 70,70 50,88 25,70 22,34"
-            fill="rgba(186,26,26,0.08)"
-            stroke="#ba1a1a"
-            strokeWidth="1.5"
-          />
-          <polygon
-            points="50,28 63,42 61,62 50,76 37,62 35,43"
-            fill="rgba(0,0,0,0.08)"
-            stroke="#000"
-            strokeWidth="1.5"
-          />
-        </Box>
-        <Typography
-          variant="caption"
-          sx={{ position: "absolute", zIndex: 2, bgcolor: "#f7f9fb", px: 0.5 }}
-        >
-          Radar Plot
-        </Typography>
-      </Box>
-      <Stack spacing={0.75}>
-        {[
-          ["#000", "This Email"],
-          ["#ba1a1a", "Spam Average"],
-          ["#2e7d32", "Ham Average"],
-        ].map(([color, label]) => (
-          <Stack key={label} direction="row" spacing={1} alignItems="center">
-            <Box
-              sx={{ width: 10, height: 10, bgcolor: color, borderRadius: 0.5 }}
-            />
-            <Typography variant="caption">{label}</Typography>
-          </Stack>
-        ))}
-      </Stack>
-    </Stack>
-  );
-}
+
 
 function ModelComparison({ result, selectedModel, onSelectedModelChange }) {
   const predictions = MODELS.map((model) => ({
@@ -674,7 +598,7 @@ function FeatureRadarChart({ features, averages }) {
   );
 
   useEffect(() => {
-    if (!hasEmailFeatures || !svgRef.current || !containerRef.current) {
+    if (!svgRef.current || !containerRef.current) {
       return;
     }
 
@@ -868,72 +792,70 @@ function FeatureRadarChart({ features, averages }) {
           </IconButton>
         </Stack>
 
-        {!hasEmailFeatures ? (
-          <EmptyRadarPlot />
-        ) : (
-          <Stack
-            direction="column"
-            spacing={3}
-            alignItems="center"
-            sx={{ mt: 3, width: "100%" }}
+        <Stack
+          direction="column"
+          spacing={3}
+          alignItems="center"
+          sx={{ mt: 3, width: "100%" }}
+        >
+          <Box 
+            ref={containerRef}
+            sx={{ width: "100%", display: "flex", justifyContent: "center", position: "relative" }}
           >
-            <Box 
-              ref={containerRef}
-              sx={{ width: "100%", display: "flex", justifyContent: "center", position: "relative" }}
-            >
-              <Box
-                component="svg"
-                ref={svgRef}
-                role="img"
-                aria-label="Feature radar chart"
-                sx={{ width: 260, height: 260, maxWidth: "100%", display: "block", overflow: "visible" }}
-              />
-            </Box>
-            <Stack 
-              direction="row" 
-              spacing={3} 
-              justifyContent="center" 
-              flexWrap="wrap"
-            >
-              {series.map((item) => {
-                const isHidden = hiddenSeries.has(item.key);
-                return (
-                  <Stack
-                    key={item.key}
-                    direction="row"
-                    spacing={1}
-                    alignItems="center"
-                    onClick={() => toggleSeries(item.key)}
+            <Box
+              component="svg"
+              ref={svgRef}
+              role="img"
+              aria-label="Feature radar chart"
+              sx={{ width: 260, height: 260, maxWidth: "100%", display: "block", overflow: "visible" }}
+            />
+          </Box>
+          <Stack 
+            direction="row" 
+            spacing={3} 
+            justifyContent="center" 
+            flexWrap="wrap"
+          >
+            {series.map((item) => {
+              const isHidden = hiddenSeries.has(item.key);
+              const isEmailSeries = item.key === "email";
+              const isDisabled = isEmailSeries && !hasEmailFeatures;
+              return (
+                <Stack
+                  key={item.key}
+                  direction="row"
+                  spacing={1}
+                  alignItems="center"
+                  onClick={() => !isDisabled && toggleSeries(item.key)}
+                  sx={{ 
+                    cursor: isDisabled ? "default" : "pointer", 
+                    opacity: isDisabled ? 0.35 : (isHidden ? 0.4 : 1),
+                    transition: "opacity 0.2s",
+                    "&:hover": { opacity: isDisabled ? 0.35 : (isHidden ? 0.6 : 0.8) }
+                  }}
+                >
+                  <Box
+                    sx={{
+                      width: 12,
+                      height: 12,
+                      borderRadius: 0.5,
+                      bgcolor: item.color,
+                    }}
+                  />
+                  <Typography 
+                    variant="body2" 
                     sx={{ 
-                      cursor: "pointer", 
-                      opacity: isHidden ? 0.4 : 1,
-                      transition: "opacity 0.2s",
-                      "&:hover": { opacity: isHidden ? 0.6 : 0.8 }
+                      fontWeight: 600,
+                      textDecoration: isHidden ? "line-through" : "none"
                     }}
                   >
-                    <Box
-                      sx={{
-                        width: 12,
-                        height: 12,
-                        borderRadius: 0.5,
-                        bgcolor: item.color,
-                      }}
-                    />
-                    <Typography 
-                      variant="body2" 
-                      sx={{ 
-                        fontWeight: 600,
-                        textDecoration: isHidden ? "line-through" : "none"
-                      }}
-                    >
-                      {item.label}
-                    </Typography>
-                  </Stack>
-                );
-              })}
-            </Stack>
+                    {item.label}
+                  </Typography>
+                </Stack>
+              );
+            })}
           </Stack>
-        )}
+        </Stack>
       </CardContent>
     </Card>
   );
