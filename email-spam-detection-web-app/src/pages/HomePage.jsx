@@ -224,91 +224,6 @@ export default function HomePage() {
 
       {/* About & Team Section */}
       <Box component="section">
-        <Box sx={{ textAlign: "center", mb: 5 }}>
-          <Typography 
-            variant="h4" 
-            component="h2" 
-            gutterBottom 
-            sx={{ 
-              fontFamily: '"Manrope", sans-serif', 
-              fontWeight: 700,
-              mb: 1
-            }}
-          >
-            Institutional Research
-          </Typography>
-          <Typography 
-            variant="subtitle2" 
-            color="text.secondary" 
-            sx={{ 
-              fontFamily: '"Manrope", sans-serif', 
-              fontWeight: 600,
-              letterSpacing: "0.1em",
-              textTransform: "uppercase" 
-            }}
-          >
-            COS30049 - Cloud Computing, Swinburne University of Technology
-          </Typography>
-        </Box>
-
-        <Grid container spacing={3}>
-          {[
-            {
-              name: "John Doe",
-              role: "Lead AI Engineer",
-              desc: "Responsible for model training, selection, and pipeline performance."
-            },
-            {
-              name: "Jane Smith",
-              role: "Frontend Developer",
-              desc: "Responsible for the responsive React dashboard, theme, and interactive Heatmap."
-            },
-            {
-              name: "Alex Johnson",
-              role: "Backend Developer",
-              desc: "Responsible for API endpoints, file uploads, and CSV parsing."
-            }
-          ].map((member) => (
-            <Grid size={{ xs: 12, md: 4 }} key={member.name}>
-              <Card variant="outlined" sx={{ borderRadius: "8px", height: "100%" }}>
-                <CardContent sx={{ p: 4, display: "flex", flexDirection: "column", height: "100%" }}>
-                  <Typography 
-                    variant="h5" 
-                    component="h3" 
-                    sx={{ 
-                      fontFamily: '"Manrope", sans-serif', 
-                      fontWeight: 700 
-                    }}
-                  >
-                    {member.name}
-                  </Typography>
-                  <Typography 
-                    variant="subtitle2" 
-                    color="text.secondary" 
-                    sx={{ 
-                      fontFamily: '"Manrope", sans-serif', 
-                      mb: 3, 
-                      fontWeight: 500 
-                    }}
-                  >
-                    {member.role}
-                  </Typography>
-                  <Typography 
-                    variant="body2" 
-                    color="text.secondary" 
-                    sx={{ 
-                      fontFamily: '"Manrope", sans-serif',
-                      lineHeight: 1.6
-                    }}
-                  >
-                    {member.desc}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
-
         <Box
           id="about"
           sx={{
@@ -363,6 +278,64 @@ export default function HomePage() {
             </Box>
           </Typography>
         </Box>
+
+        <Grid container spacing={3} sx={{ mb: 6 }}>
+          {[
+            {
+              name: "Aung Moe Thu",
+              role: "Leader",
+              desc: "Responsible for model training, selection, and pipeline performance."
+            },
+            {
+              name: "Kaung Htet Nyein",
+              role: "Member",
+              desc: "Responsible for the responsive React dashboard, theme, and interactive Heatmap."
+            },
+            {
+              name: "Show Wai Yan",
+              role: "Member",
+              desc: "Responsible for API endpoints, file uploads, and CSV parsing."
+            }
+          ].map((member) => (
+            <Grid size={{ xs: 12, md: 4 }} key={member.name}>
+              <Card variant="outlined" sx={{ borderRadius: "8px", height: "100%" }}>
+                <CardContent sx={{ p: 4, display: "flex", flexDirection: "column", height: "100%" }}>
+                  <Typography 
+                    variant="h5" 
+                    component="h3" 
+                    sx={{ 
+                      fontFamily: '"Manrope", sans-serif', 
+                      fontWeight: 700 
+                    }}
+                  >
+                    {member.name}
+                  </Typography>
+                  <Typography 
+                    variant="subtitle2" 
+                    color="text.secondary" 
+                    sx={{ 
+                      fontFamily: '"Manrope", sans-serif', 
+                      mb: 3, 
+                      fontWeight: 500 
+                    }}
+                  >
+                    {member.role}
+                  </Typography>
+                  <Typography 
+                    variant="body2" 
+                    color="text.secondary" 
+                    sx={{ 
+                      fontFamily: '"Manrope", sans-serif',
+                      lineHeight: 1.6
+                    }}
+                  >
+                    {member.desc}
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
 
         <Grid container spacing={3} sx={{ mb: 4 }}>
           {[
