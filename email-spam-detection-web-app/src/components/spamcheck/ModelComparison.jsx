@@ -269,6 +269,8 @@ export function ModelComparison({ result, selectedModel, onSelectedModelChange }
                           bgcolor: isActive ? "error.main" : "#fca5a5",
                           borderRadius: "4px 4px 0 0",
                           transition: "background-color 0.3s ease",
+                          printColorAdjust: "exact",
+                          WebkitPrintColorAdjust: "exact",
                         }}
                       />
                       <Box
@@ -278,6 +280,8 @@ export function ModelComparison({ result, selectedModel, onSelectedModelChange }
                           bgcolor: isActive ? "#22c55e" : "#86efac",
                           borderRadius: "4px 4px 0 0",
                           transition: "background-color 0.3s ease",
+                          printColorAdjust: "exact",
+                          WebkitPrintColorAdjust: "exact",
                         }}
                       />
                       <Typography

@@ -268,6 +268,8 @@ function GroupedBarChart({ summaries, models }) {
                       position: "relative",
                       display: "flex",
                       justifyContent: "center",
+                      printColorAdjust: "exact",
+                      WebkitPrintColorAdjust: "exact",
                     }}
                   >
                     <Typography
@@ -289,6 +291,8 @@ function GroupedBarChart({ summaries, models }) {
                       position: "relative",
                       display: "flex",
                       justifyContent: "center",
+                      printColorAdjust: "exact",
+                      WebkitPrintColorAdjust: "exact",
                     }}
                   >
                     <Typography
