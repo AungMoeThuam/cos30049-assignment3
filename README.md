@@ -88,7 +88,6 @@ npm run dev
 ---
 
 ## 👨‍💻 Team
-*(Note: Be sure to update your exact team member names in `HomePage.jsx` if needed)*
-- Lead AI Engineer
-- Frontend Developer
-- Backend Developer
+- Aung Moe Thu - Lead AI Engineer
+- SHow Wai Yan - Frontend Developer
+- Kaung Htet Nyein - Backend Developer
